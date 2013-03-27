@@ -1,0 +1,5 @@
+en:
+  vagrant_hostmanager:
+    action:
+      update_hosts_file:
+        update: "Updating /etc/hosts file on %{name}"

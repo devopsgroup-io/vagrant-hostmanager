@@ -1,0 +1,4 @@
+*.gem
+pkg
+Gemfile.lock
+test/.vagrant
