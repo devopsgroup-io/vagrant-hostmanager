@@ -39,9 +39,11 @@ module VagrantPlugins
           # copy the hosts file to each matching machine
           # TODO append hostname to loopback address
           matching_machines.each do |machine|
-            env[:ui].info @translator.t('update', { :name => machine.name })
-            machine.communicate.upload(path, '/tmp/hosts')
-            machine.communicate.sudo("mv /tmp/hosts /etc/hosts")
+            if machine.communicate.ready?
+              env[:ui].info @translator.t('update', { :name => machine.name })
+              machine.communicate.upload(path, '/tmp/hosts')
+              machine.communicate.sudo("mv /tmp/hosts /etc/hosts")
+            end
           end
 
           @app.call(env)
