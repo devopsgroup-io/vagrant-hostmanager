@@ -13,24 +13,21 @@ module VagrantPlugins
       action_hook(:hostmanager_up, :machine_action_up) do |hook|
         setup_i18n
         setup_logging
-
-        # TODO use hook.append when defect is fixed within vagrant
-        hook.after(ProviderVirtualBox::Action::Boot, Action::UpdateHostsFile)
+        hook.append(Action::UpdateHostsFile)
       end
 
       action_hook(:hostmanger_destroy, :machine_action_destroy) do |hook|
         setup_i18n
         setup_logging
-
-        # TODO use hook.append when defect is fixed within vagrant
-        hook.after(
-          ProviderVirtualBox::Action::DestroyUnusedNetworkInterfaces,
-          Action::UpdateHostsFile)
+        hook.append(Action::UpdateHostsFile)
       end
 
       def self.setup_i18n
-        I18n.load_path << File.expand_path('locales/en.yml', HostManager.source_root)
+        I18n.load_path << File.expand_path(
+          'locales/en.yml',
+          HostManager.source_root)
         I18n.reload!
+
         Helpers::Translator.plugin_namespace = 'vagrant_hostmanager'
       end
 

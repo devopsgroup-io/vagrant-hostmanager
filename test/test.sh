@@ -1,9 +1,3 @@
-gem uninstall -a vagrant-hostmanager
-gem build *.gemspec
-gem install *.gem
-rm *.gem
-vagrant plugin install vagrant-hostmanager
-
 cd test
 
 vagrant up
