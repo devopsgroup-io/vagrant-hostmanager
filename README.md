@@ -11,19 +11,31 @@ The current implementation is a proof-of-concept supporting the larger
 objective of using Vagrant as a cloud management interface for development
 and production environments.
 
-The plugin has been tested with Vagrant 1.1.4.
+The plugin has been tested with Vagrant 1.1.5.
 
 Installation
 ------------
 Install the plugin following the typical Vagrant 1.1 procedure:
 
-    vagrant plugin install vagrant-hostmanager
+    $ vagrant plugin install vagrant-hostmanager
 
 Usage
 -----
-The plugin hooks into the `vagrant up` and `vagrant destroy` commands
-automatically updating the `/etc/hosts` file on each active machine that
-is using the same provider.
+To update the `/etc/hosts` file on each active machine, run the following
+command:
+
+    $ vagrant hostmanager
+
+The plugin may hook into the `vagrant up` and `vagrant destroy` commands
+automatically to update the `/etc/hosts` file on each active machine that
+is using the same provider. To enable this, add the following configuration
+to your Vagrant file:
+
+```ruby
+Vagrant.configure('2') do |config|
+  config.hostmanager.auto_update = true
+end
+```
 
 A machine's IP address is defined by either the static IP for a private
 network configuration or by the SSH host configuration.

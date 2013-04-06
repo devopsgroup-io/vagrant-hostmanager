@@ -10,16 +10,26 @@ module VagrantPlugins
         created for each active machine using the hostname attribute.
       DESC
 
-      action_hook(:hostmanager_up, :machine_action_up) do |hook|
+      def self.update(hook)
         setup_i18n
         setup_logging
         hook.append(Action::UpdateHostsFile)
       end
 
-      action_hook(:hostmanger_destroy, :machine_action_destroy) do |hook|
+      config(:hostmanager) do
+        require_relative 'config'
+        Config
+      end
+
+      action_hook(:hostmanager_up, :machine_action_up, &method(:update))
+      action_hook(:hostmanger_destroy, :machine_action_destroy, &method(:update))
+
+      # TODO remove duplication of i18n and logging setup
+      command(:hostmanager) do 
         setup_i18n
         setup_logging
-        hook.append(Action::UpdateHostsFile)
+        require_relative 'command'
+        Command
       end
 
       def self.setup_i18n
