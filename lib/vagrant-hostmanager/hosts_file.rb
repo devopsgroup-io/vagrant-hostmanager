@@ -10,10 +10,12 @@ module VagrantPlugins
         # define a lambda for looking up a machine's ip address
         get_ip_address = lambda do |machine|
           ip = nil
-          machine.config.vm.networks.each do |network|
-            key, options = network[0], network[1]
-            ip = options[:ip] if key == :private_network
-            next if ip
+          unless machine.config.hostmanager.ignore_private_ip
+            machine.config.vm.networks.each do |network|
+              key, options = network[0], network[1]
+              ip = options[:ip] if key == :private_network
+              next if ip
+            end
           end
           ip || machine.ssh_info[:host]
         end
@@ -43,14 +45,12 @@ module VagrantPlugins
       def update(machine)
         path = machine.env.tmp_path.join('hosts')
         if machine.communicate.ready?
-          machine.env.ui.info translator.t('update', { :name => machine.name })
+          machine.env.ui.info I18n.t('vagrant_hostmanager.action.update', {
+            :name => machine.name
+          })
           machine.communicate.upload(path, '/tmp/hosts')
           machine.communicate.sudo("mv /tmp/hosts /etc/hosts")
         end
-      end
-
-      def translator
-        Helpers::Translator.new('hosts_file')
       end
     end
   end

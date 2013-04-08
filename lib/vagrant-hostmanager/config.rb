@@ -2,18 +2,16 @@ module VagrantPlugins
   module HostManager
     class Config < Vagrant.plugin('2', :config)
       attr_accessor :auto_update
+      attr_accessor :ignore_private_ip
 
       def initialize
-        @auto_update = false
+        @auto_update = UNSET_VALUE
+        @ignore_private_ip = UNSET_VALUE
       end
 
-      def validate(machine)
-        errors = []
-        if !(!!@auto_update == @auto_update)
-          errors << 'auto_update must be a boolean' 
-        end
-
-        { 'hostmanager' => errors }
+      def finalize!
+        @auto_update = true if @auto_update == UNSET_VALUE
+        @ignore_private_ip = false if @ignore_private_ip == UNSET_VALUE
       end
     end
   end

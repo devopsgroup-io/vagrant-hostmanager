@@ -9,22 +9,23 @@ module VagrantPlugins
         def initialize(app, env)
           @app = app
           @machine = env[:machine]
-          @translator = Helpers::Translator.new('action.update_hosts_file')
-          @logger =
-            Log4r::Logger.new('vagrant_hostmanager::action::update')
+          @logger = Log4r::Logger.new('vagrant::hostmanager::update_hosts_file')
         end
 
         def call(env)
-          # check config to see if the hosts file should updated automatically
-          if @machine.config.hostmanager.auto_update
-            # generate temporary hosts file
-            machines = generate(@machine.env, @machine.provider_name)
+          # check if machine is already active
+          return @app.call(env) if @machine.id
 
-            # update /etc/hosts file on each active machine
-            machines.each { |machine| update(machine) }
-          end
+          # check config to see if the hosts file should be update automatically
+          return @app.call(env) if !@machine.config.hostmanager.auto_update
+          @logger.info 'Updating /etc/hosts file automatically'
 
+          # continue the action stack so the machine will be created
           @app.call(env)
+
+          # update /etc/hosts file on each active machine
+          machines = generate(@machine.env, @machine.provider_name)
+          machines.each { |machine| update(machine) }
         end
       end
     end
