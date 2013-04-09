@@ -18,9 +18,9 @@ module VagrantPlugins
         argv = parse_options(opts)
         options[:provider] ||= @env.default_provider
 
-        generate(@env, options[:provider])
+        generate(@env, options[:provider].to_sym)
 
-        with_target_vms(argv[1..-1], :provider => options[:provider]) do |machine|
+        with_target_vms(argv, options) do |machine|
           update(machine)
         end
       end
