@@ -10,7 +10,7 @@ module VagrantPlugins
         # define a lambda for looking up a machine's ip address
         get_ip_address = lambda do |machine|
           ip = nil
-          unless machine.config.hostmanager.ignore_private_ip
+          if machine.config.hostmanager.ignore_private_ip != true
             machine.config.vm.networks.each do |network|
               key, options = network[0], network[1]
               ip = options[:ip] if key == :private_network
