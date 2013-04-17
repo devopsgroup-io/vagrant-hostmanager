@@ -23,7 +23,7 @@ module VagrantPlugins
         # create the temporary hosts file
         path = env.tmp_path.join('hosts')
         File.open(path, 'w') do |file|
-          file << "127.0.0.1\tlocalhost\n"
+          file << "127.0.0.1\tlocalhost\slocalhost.localdomain\n"
 
           # add a hosts entry for each active machine matching the provider
           env.active_machines.each do |name, p|
