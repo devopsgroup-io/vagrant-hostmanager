@@ -40,6 +40,20 @@ to true.
 A machine's host name is defined by `config.vm.hostname`. If this is not
 set, it falls back to the symbol defining the machine in the Vagrantfile.
 
+In addition, the hostmanager.aliases configuration option can be used to provide aliases for your host names.
+
+Example configuration:
+
+  Vagrant.configure("2") do |config|
+    config.hostmanager.auto_update = true
+    config.hostmanager.ignore_private_ip = false
+    config.vm.define "example-box" do |node|
+       node.vm.hostname = "example-box-hostname"
+       node.vm.network :private_network, ip: "192.168.42.42"
+       node.hostmanager.aliases = %w(example-box.localdomain example-box-alias)
+    end
+  end
+
 Contribute
 ----------
 Contributions are welcome.
