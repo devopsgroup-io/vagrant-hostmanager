@@ -19,24 +19,18 @@ module VagrantPlugins
       def validate(machine)
         errors = Array.new
 
-        # check if auto_update option is defined in Vagrantfile
-        # and check if is either true or false accordingly
-        if (machine.config.hostmanager.auto_update &&
-            ![TrueClass, FalseClass].include?(auto_update.class))
+        # check if auto_update option is either true or false
+        if ![TrueClass, FalseClass].include?(auto_update.class)
           errors << "A value for hostmanager.auto_update can be true or false."
         end
 
-        # check if ignore_private_ip option is defined in Vagrantfile
-        # and check if is either true or false accordingly
-        if (machine.config.hostmanager.ignore_private_ip &&
-            ![TrueClass, FalseClass].include?(ignore_private_ip.class))
+        # check if ignore_private_ip option is either true or false
+        if ![TrueClass, FalseClass].include?(ignore_private_ip.class)
           errors << "A value for hostmanager.ignore_private_ip can be true or false."
         end
 
-        # check if aliases option is defined in Vagrantfile
-        # and check if is an Array accordingly
-        if (machine.config.hostmanager.aliases &&
-            !machine.config.hostmanager.aliases.kind_of?(Array))
+        # check if aliases option is an Array
+        if !machine.config.hostmanager.aliases.kind_of?(Array)
           errors << "A value for hostmanager.aliases must be an Array."
         end
         
