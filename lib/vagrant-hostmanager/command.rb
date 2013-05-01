@@ -16,6 +16,8 @@ module VagrantPlugins
         end
 
         argv = parse_options(opts)
+        return if !argv
+
         options[:provider] ||= @env.default_provider
 
         generate(@env, options[:provider].to_sym)
