@@ -57,6 +57,23 @@ Vagrant.configure("2") do |config|
 end
 ```
 
+As a last option, you can also choose hostmanager as a provisioner.
+This allows you to use the provisioning order to ensure that hostmanager
+runs before or after provisioning:
+
+```ruby
+Vagrant.configure("2") do |config|
+  ...
+  ## Cut box configurations ##
+
+  # Run hostmanager before the shell provisioner
+  vm_config.vm.provision :hostmanager
+  vm_config.vm.provision :shell do |shell|
+    shell.path = 'foo/bar.sh'
+  end
+end
+```
+
 Contribute
 ----------
 Contributions are welcome.
