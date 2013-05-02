@@ -32,7 +32,7 @@ module VagrantPlugins
               host = machine.config.vm.hostname || name
               ip = get_ip_address.call(machine)
               host_aliases = machine.config.hostmanager.aliases.join("\s").chomp
-              @logger.info "Adding /etc/hosts entry: #{ip} #{host} #{host_aliases}"
+              machine.env.ui.info "Adding /etc/hosts entry: #{ip} #{host} #{host_aliases}"
               file << "#{ip}\t#{host}\s#{host_aliases}\n"
             end
           end
