@@ -57,6 +57,17 @@ Vagrant.configure("2") do |config|
 end
 ```
 
+As a last option, you can also choose hostmanager as a provisioner.
+This allows you to use the provisioning order to ensure that hostmanager
+runs before or after provisioning. The provisioner will collect hosts from
+boxes with the same provider as the running box.
+
+Use:
+
+```ruby
+config.vm.provision :hostmanager
+```
+
 Contribute
 ----------
 Contributions are welcome.
