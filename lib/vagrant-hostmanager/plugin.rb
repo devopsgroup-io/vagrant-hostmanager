@@ -1,4 +1,6 @@
 require 'vagrant-hostmanager/action/update_hosts_file'
+require 'vagrant-hostmanager/action/update_local_entry'
+require 'vagrant-hostmanager/action/delete_local_entry'
 
 module VagrantPlugins
   module HostManager
@@ -16,9 +18,11 @@ module VagrantPlugins
 
       action_hook(:hostmanager, :machine_action_up) do |hook|
         hook.prepend(Action::UpdateHostsFile)
+        hook.prepend(Action::UpdateLocalEntry)
       end
 
       action_hook(:hostmanager, :machine_action_destroy) do |hook|
+        hook.prepend(Action::DeleteLocalEntry)
         hook.append(Action::UpdateHostsFile)
       end
 

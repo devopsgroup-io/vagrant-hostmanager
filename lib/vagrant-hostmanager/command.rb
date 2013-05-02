@@ -22,6 +22,7 @@ module VagrantPlugins
 
         with_target_vms(argv, options) do |machine|
           update(machine)
+          update_local(machine)
         end
       end
     end
