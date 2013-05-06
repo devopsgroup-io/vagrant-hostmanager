@@ -24,9 +24,7 @@ module VagrantPlugins
         path = env.tmp_path.join('hosts')
         File.open(path, 'w') do |file|
           file << "127.0.0.1\tlocalhost\slocalhost.localdomain\n"
-
-          # add a hosts entry for each active machine matching the provider
-          env.active_machines.each do |name, p|
+          get_machines(env, provider).each do |name, p|
             if provider == p
               machines << machine = env.machine(name, provider)
               host = machine.config.vm.hostname || name
@@ -57,6 +55,14 @@ module VagrantPlugins
           machine.communicate.sudo("mv /tmp/hosts /etc/hosts")
         end
       end
+
+      private
+      # Returns an array with the same structure as env.active_machines:
+      # [ [:machine, :virtualbox], [:foo, :virtualbox] ]
+      def get_machines(env, provider)
+        env.active_machines
+      end
+
     end
   end
 end
