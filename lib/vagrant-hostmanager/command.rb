@@ -8,6 +8,8 @@ module VagrantPlugins
         opts = OptionParser.new do |o|
           o.banner = 'Usage: vagrant hostmanager [vm-name]'
           o.separator ''
+          o.version = VagrantPlugins::HostManager::VERSION
+          o.program_name = 'vagrant hostmanager'
 
           o.on('--provider provider', String,
             'Update machines with the specific provider.') do |provider|
