@@ -4,13 +4,16 @@ module VagrantPlugins
       attr_accessor :enabled
       attr_accessor :ignore_private_ip
       attr_accessor :aliases
+      attr_accessor :include_offline
 
       alias_method :enabled?, :enabled
+      alias_method :include_offline?, :include_offline
 
       def initialize
         @enabled = false
         @ignore_private_ip = UNSET_VALUE
         @aliases = Array.new
+        @include_offline = false
       end
 
       def finalize!
@@ -23,6 +26,9 @@ module VagrantPlugins
 
         # check if enabled option is either true or false
         errors << validate_bool('hostmanager.enabled', enabled)
+
+        # check if include_offline is either true or false
+        errors << validate_bool('hostmanager.include_offline', include_offline)
 
         # check if ignore_private_ip option is either true or false (or UNSET_VALUE)
         if @ignore_private_ip != UNSET_VALUE
