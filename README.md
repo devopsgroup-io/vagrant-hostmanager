@@ -40,6 +40,10 @@ to true.
 A machine's host name is defined by `config.vm.hostname`. If this is not
 set, it falls back to the symbol defining the machine in the Vagrantfile.
 
+When using include_offline set to true, only boxes that are up or have a
+private ip configured will be added to the hosts file. You will receive a
+warning on skipped boxes.
+
 In addition, the `hostmanager.aliases` configuration attribute can be used
 to provide aliases for your host names.
 
@@ -49,6 +53,7 @@ Example configuration:
 Vagrant.configure("2") do |config|
   config.hostmanager.enabled = true
   config.hostmanager.ignore_private_ip = false
+  config.hostmanager.include_offline = true
   config.vm.define "example-box" do |node|
     node.vm.hostname = "example-box-hostname"
     node.vm.network :private_network, ip: "192.168.42.42"

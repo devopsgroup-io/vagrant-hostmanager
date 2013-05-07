@@ -17,31 +17,34 @@ module VagrantPlugins
               next if ip
             end
           end
-          ip || machine.ssh_info[:host]
+          ip || (machine.ssh_info ? machine.ssh_info[:host] : nil)
         end
 
         # create the temporary hosts file
         path = env.tmp_path.join('hosts')
         File.open(path, 'w') do |file|
           file << "127.0.0.1\tlocalhost\slocalhost.localdomain\n"
-
-          # add a hosts entry for each active machine matching the provider
-          env.active_machines.each do |name, p|
+          get_machines(env, provider).each do |name, p|
             if provider == p
               machines << machine = env.machine(name, provider)
               host = machine.config.vm.hostname || name
               ip = get_ip_address.call(machine)
-              host_aliases = machine.config.hostmanager.aliases.join("\s").chomp
-              machine.env.ui.info I18n.t('vagrant_hostmanager.action.add_host', {
-                :ip       => ip,
-                :host     => host,
-                :aliases  => host_aliases,
-              })
-              file << "#{ip}\t#{host}\s#{host_aliases}\n"
+              if ip
+                host_aliases = machine.config.hostmanager.aliases.join("\s").chomp
+                machine.env.ui.info I18n.t('vagrant_hostmanager.action.add_host', {
+                  :ip       => ip,
+                  :host     => host,
+                  :aliases  => host_aliases,
+                })
+                file << "#{ip}\t#{host}\s#{host_aliases}\n"
+              else
+                machine.env.ui.warn I18n.t('vagrant_hostmanager.action.host_no_ip', {
+                  :name => name,
+                })
+              end
             end
           end
         end
-
         machines
       end
 
@@ -57,6 +60,30 @@ module VagrantPlugins
           machine.communicate.sudo("mv /tmp/hosts /etc/hosts")
         end
       end
+
+      private
+      # Either use the active machines, or loop over all available machines and
+      # get those with the same provider (aka, ignore boxes that throw MachineNotFound errors).
+      #
+      # Returns an array with the same structure as env.active_machines:
+      # [ [:machine, :virtualbox], [:foo, :virtualbox] ]
+      def get_machines(env, provider)
+        if env.config_global.hostmanager.include_offline?
+          machines = []
+          env.machine_names.each do |name|
+            begin
+              m = env.machine(name, provider)
+              machines << [name, provider]
+            rescue Vagrant::Errors::MachineNotFound => ex
+              # ignore this box.
+            end
+          end
+          machines
+        else
+          env.active_machines
+        end
+      end
+
     end
   end
 end
