@@ -92,7 +92,7 @@ module VagrantPlugins
             @logger.info "copy #{temp_file_name} #{file_name}"
             FileUtils.cp(temp_file_name,file_name)
          else
-          machine.env.ui.info I18n.t('vagrant_hostmanager.action.run_sudo')
+            machine.env.ui.info I18n.t('vagrant_hostmanager.action.run_sudo')
             @logger.warn "Running sudo to replace local hosts file, enter your local password if prompted..."
             @logger.info `sudo cp -v #{temp_file_name} #{file_name}`
          end
@@ -114,7 +114,7 @@ module VagrantPlugins
             @logger.info "copy #{temp_file_name} #{file_name}"
                 FileUtils.cp(temp_file_name,file_name)
           else
-              @logger.info "Running sudo to replace local hosts file, enter your local password if prompted..."
+              machine.env.ui.info I18n.t('vagrant_hostmanager.action.run_sudo')
               @logger.info `sudo cp -v #{temp_file_name} #{file_name}`
           end
       end
