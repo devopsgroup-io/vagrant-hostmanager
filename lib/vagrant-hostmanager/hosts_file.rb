@@ -48,7 +48,7 @@ module VagrantPlugins
             machine.communicate.download('/etc/hosts',path.join("hosts.#{name}"))
             delete_entry(victim,path.join("hosts.#{name}"))               
             if machine.communicate.ready?
-                machine.env.ui.info I18n.t('vagrant_hostmanager.action.update', {
+                machine.env.ui.info I18n.t('vagrant_hostmanager.action.update_guest', {
                     :name => machine.name
                 })
                 machine.communicate.upload(path.join("hosts.#{name}"), '/tmp/hosts')
@@ -81,7 +81,7 @@ module VagrantPlugins
          host_aliases = machine.config.hostmanager.aliases.join("\s").chomp
          host_entry = "#{ip}\t#{host}\s#{host_aliases}\s# VAGRANT: #{id}\n" 
          @logger.info "Adding /etc/hosts entry: #{host_entry}"
-         temp_file_name = Dir::Tmpname.make_tmpname(File.join(machine.env.tmp_path,'hostnamanager'), nil) 
+         temp_file_name = Dir::Tmpname.make_tmpname(File.join(machine.env.tmp_path,'hostmanager'), nil) 
          FileUtils.cp(file_name, temp_file_name)
          File.open(temp_file_name,'a') do |tempfile|
              @logger.info "writing #{host_entry} to #{tempfile.path}"
@@ -90,15 +90,17 @@ module VagrantPlugins
 
          if sudo == false
             @logger.info "copy #{temp_file_name} #{file_name}"
-            FileUtils.cp(temp_file_name,file_name,:verbose => true)
+            FileUtils.cp(temp_file_name,file_name)
          else
+          machine.env.ui.info I18n.t('vagrant_hostmanager.action.run_sudo')
+            @logger.warn "Running sudo to replace local hosts file, enter your local password if prompted..."
             @logger.info `sudo cp -v #{temp_file_name} #{file_name}`
          end
       end
 
       def delete_entry(machine,file_name,sudo=false)
           host = machine.config.vm.hostname || name
-          temp_file_name = Dir::Tmpname.make_tmpname(File.join(machine.env.tmp_path,'hostnamanager'), nil) 
+          temp_file_name = Dir::Tmpname.make_tmpname(File.join(machine.env.tmp_path,'hostmanager'), nil) 
           tempfile = File.open(temp_file_name,'w') do |f| 
             File.open(file_name,'r').each_line do |line|
               if line.match(/#{machine.id}$/).nil?
@@ -109,8 +111,10 @@ module VagrantPlugins
             end
           end
           if sudo == false
-                FileUtils.cp(temp_file_name,file_name,:verbose => true)
+            @logger.info "copy #{temp_file_name} #{file_name}"
+                FileUtils.cp(temp_file_name,file_name)
           else
+              @logger.info "Running sudo to replace local hosts file, enter your local password if prompted..."
               @logger.info `sudo cp -v #{temp_file_name} #{file_name}`
           end
       end
@@ -135,7 +139,7 @@ module VagrantPlugins
       def update(machine)
         path = machine.env.tmp_path.join('hosts')
         if machine.communicate.ready?
-          machine.env.ui.info I18n.t('vagrant_hostmanager.action.update', {
+          machine.env.ui.info I18n.t('vagrant_hostmanager.action.update_guest', {
             :name => machine.name
           })
           machine.communicate.download(path, '/etc/hosts')

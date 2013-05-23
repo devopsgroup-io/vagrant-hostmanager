@@ -1,4 +1,6 @@
 en:
   vagrant_hostmanager:
     action:
-      update: "[%{name}] Updating /etc/hosts file"
+      update_guest: "[%{name}] Updating /etc/hosts file"
+      update_host: "Updating local /etc/hosts file"
+      run_sudo: "Running sudo to modify host machine's /etc/hosts file"
