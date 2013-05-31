@@ -22,13 +22,11 @@ module VagrantPlugins
                 machines.each do |m|
                     @logger.info "Adding entry for #{m.name} to hosts.#{name}"
                     update_entry(m,path.join("hosts.#{name}"))
-                    m.communicate.upload(path.join("hosts.#{name}"), '/tmp/hosts')
-                    m.communicate.sudo("mv /tmp/hosts /etc/hosts")
                 end
             end
+            env.machine(name,p).communicate.upload(path.join("hosts.#{name}"), '/tmp/hosts')
+            env.machine(name,p).communicate.sudo("mv /tmp/hosts /etc/hosts")
         end
-
-        machines
       end
 
       # delete victim machine from all guests
