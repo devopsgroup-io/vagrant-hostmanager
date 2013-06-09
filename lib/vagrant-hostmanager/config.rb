@@ -5,6 +5,7 @@ module VagrantPlugins
       attr_accessor :ignore_private_ip
       attr_accessor :aliases
       attr_accessor :include_offline
+      attr_accessor :ip_resolver
 
       alias_method :enabled?, :enabled
       alias_method :include_offline?, :include_offline
@@ -14,6 +15,7 @@ module VagrantPlugins
         @ignore_private_ip = UNSET_VALUE
         @aliases = Array.new
         @include_offline = false
+        @ip_resolver = nil
       end
 
       def finalize!
@@ -36,11 +38,19 @@ module VagrantPlugins
         end
 
         # check if aliases option is an Array
-        if  !machine.config.hostmanager.aliases.kind_of?(Array) and
+        if  !machine.config.hostmanager.aliases.kind_of?(Array) &&
             !machine.config.hostmanager.aliases.kind_of?(String)
           errors << I18n.t('vagrant_hostmanager.config.not_an_array_or_string', {
             :config_key => 'hostmanager.aliases',
             :is_class   => aliases.class.to_s,
+          })
+        end
+
+        if !machine.config.hostmanager.ip_resolver.nil? &&
+           !machine.config.hostmanager.ip_resolver.kind_of?(Proc)
+          errors << I18n.t('vagrant_hostmanager.config.not_a_proc', {
+            :config_key => 'hostmanager.ip_resolver',
+            :is_class   => ip_resolver.class.to_s,
           })
         end
 
