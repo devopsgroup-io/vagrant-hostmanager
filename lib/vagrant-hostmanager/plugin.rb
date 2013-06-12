@@ -10,6 +10,8 @@ module VagrantPlugins
       description <<-DESC
         This plugin manages the /etc/hosts file for guest machines. An entry is
         created for each active machine using the hostname attribute.
+
+        You can also use the hostmanager provisioner to update the hosts file.
       DESC
 
       config(:hostmanager) do
@@ -29,6 +31,11 @@ module VagrantPlugins
       action_hook(:hostmanager, :machine_action_destroy) do |hook|
         hook.prepend(Action::DeleteLocalEntry)
         hook.append(Action::DeleteGuests)
+      end
+
+      provisioner(:hostmanager) do
+        require_relative 'provisioner'
+        Provisioner
       end
 
       command(:hostmanager) do
