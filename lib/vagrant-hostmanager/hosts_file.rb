@@ -69,7 +69,7 @@ module VagrantPlugins
               next if ip
             end
           end
-          ip || machine.ssh_info[:host]
+          ip || (machine.ssh_info ? machine.ssh_info[:host] : nil)
         end
 
       def update_entry(machine,file_name,sudo=false)
@@ -147,6 +147,30 @@ module VagrantPlugins
           machine.communicate.sudo("mv /tmp/hosts /etc/hosts")
         end
       end
+
+      private
+      # Either use the active machines, or loop over all available machines and
+      # get those with the same provider (aka, ignore boxes that throw MachineNotFound errors).
+      #
+      # Returns an array with the same structure as env.active_machines:
+      # [ [:machine, :virtualbox], [:foo, :virtualbox] ]
+      def get_machines(env, provider)
+        if env.config_global.hostmanager.include_offline?
+          machines = []
+          env.machine_names.each do |name|
+            begin
+              m = env.machine(name, provider)
+              machines << [name, provider]
+            rescue Vagrant::Errors::MachineNotFound => ex
+              # ignore this box.
+            end
+          end
+          machines
+        else
+          env.active_machines
+        end
+      end
+
     end
   end
 end
