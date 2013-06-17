@@ -100,21 +100,25 @@ module VagrantPlugins
       def delete_entry(machine,file_name,sudo=false)
           host = machine.config.vm.hostname || name
           temp_file_name = Dir::Tmpname.make_tmpname(File.join(machine.env.tmp_path,'hostmanager'), nil) 
-          tempfile = File.open(temp_file_name,'w') do |f| 
-            File.open(file_name,'r').each_line do |line|
-              if line.match(/#{machine.id}$/).nil?
-                 f << line
-              else
-                  @logger.info "Matched #{machine.id}"
+          if not machine.id.nil?
+              tempfile = File.open(temp_file_name,'w') do |f| 
+                File.open(file_name,'r').each_line do |line|
+                  if line.match(/#{machine.id}$/).nil?
+                     f << line
+                  else
+                      @logger.info "Matched #{machine.id}"
+                  end
+                end
               end
-            end
-          end
-          if sudo == false
-            @logger.info "copy #{temp_file_name} #{file_name}"
-                FileUtils.cp(temp_file_name,file_name)
+              if sudo == false
+                @logger.info "copy #{temp_file_name} #{file_name}"
+                    FileUtils.cp(temp_file_name,file_name)
+              else
+                  machine.env.ui.info I18n.t('vagrant_hostmanager.action.run_sudo')
+                  @logger.info `sudo cp -v #{temp_file_name} #{file_name}`
+              end
           else
-              machine.env.ui.info I18n.t('vagrant_hostmanager.action.run_sudo')
-              @logger.info `sudo cp -v #{temp_file_name} #{file_name}`
+              @logger.warn "Machine id to delete was empty, skipping..."
           end
       end
 

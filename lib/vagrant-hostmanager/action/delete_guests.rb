@@ -20,11 +20,12 @@ module VagrantPlugins
           return @app.call(env) unless @machine.config.hostmanager.enabled?
           @logger.info 'Updating /etc/hosts file automatically'
 
+          # update /etc/hosts file on each active machine
+          delete_guests(@machine,@machine.provider_name)
+
           # continue the action stack so the machine will be created
           @app.call(env)
 
-          # update /etc/hosts file on each active machine
-          delete_guests(@machine,@machine.provider_name)
         end
       end
     end

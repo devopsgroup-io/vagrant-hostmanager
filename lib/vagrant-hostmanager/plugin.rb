@@ -30,7 +30,7 @@ module VagrantPlugins
 
       action_hook(:hostmanager, :machine_action_destroy) do |hook|
         hook.prepend(Action::DeleteLocalEntry)
-        hook.append(Action::DeleteGuests)
+        hook.prepend(Action::DeleteGuests)
       end
 
       provisioner(:hostmanager) do
