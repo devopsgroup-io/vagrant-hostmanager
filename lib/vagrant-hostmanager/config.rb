@@ -2,17 +2,18 @@ module VagrantPlugins
   module HostManager
     class Config < Vagrant.plugin('2', :config)
       attr_accessor :enabled
-      attr_accessor :manage_local
+      attr_accessor :manage_host
       attr_accessor :ignore_private_ip
       attr_accessor :aliases
       attr_accessor :include_offline
 
       alias_method :enabled?, :enabled
       alias_method :include_offline?, :include_offline
+      alias_method :manage_host?, :manage_host
 
       def initialize
         @enabled = false
-        @manage_local = true
+        @manage_local = false
         @ignore_private_ip = UNSET_VALUE
         @aliases = Array.new
         @include_offline = false
@@ -33,9 +34,9 @@ module VagrantPlugins
         errors << validate_bool('hostmanager.include_offline', include_offline)
 
         # check if manage_local option is either true or false
-        if ![TrueClass, FalseClass].include?(manage_local.class)
-          errors << "A value for hostmanager.manage_local can be true or false."
-        end
+        # if ![TrueClass, FalseClass].include?(manage_local.class)
+        #   errors << "A value for hostmanager.manage_local can be true or false."
+        # end
 
         # check if ignore_private_ip option is either true or false (or UNSET_VALUE)
         if @ignore_private_ip != UNSET_VALUE

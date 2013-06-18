@@ -6,7 +6,7 @@ module VagrantPlugins
       def execute
         options = {}
         opts = OptionParser.new do |o|
-          o.banner = 'Usage: vagrant hostmanager [vm-name]'
+          o.banner = 'Usage: vagrant hostmanager'
           o.separator ''
           o.version = VagrantPlugins::HostManager::VERSION
           o.program_name = 'vagrant hostmanager'
@@ -17,14 +17,13 @@ module VagrantPlugins
           end
         end
 
-        argv = parse_options(opts)
-        return if !argv
+        parse_options(opts)
 
         options[:provider] ||= @env.default_provider
 
-        with_target_vms(argv, options) do |machine|
-          update_guests(machine, machine.provider_name)
-          update_local(machine)
+        update_guests(@env, options[:provider])
+        if (@env.config_global.hostmanager.manage_host?)
+          update_host(@env, options[:provider])
         end
       end
     end

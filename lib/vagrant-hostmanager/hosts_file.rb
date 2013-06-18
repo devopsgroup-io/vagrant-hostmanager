@@ -1,175 +1,85 @@
+require 'tempfile'
+
 module VagrantPlugins
   module HostManager
     module HostsFile
-      def update_guests(machine, provider)
-        machines = []
-
-        env = machine.env
-        # create the temporary hosts file
-        path = env.tmp_path
-
-        #fetch hosts file from each machine
-        #for each machine, ensure all machine entries are updated
-        # add a hosts entry for each active machine matching the provider
+      def update_guests(env, provider)
+        entries = get_entries(env, provider)
         env.active_machines.each do |name, p|
           if provider == p
-            machines << machine = env.machine(name, provider)
-            machine.communicate.download('/etc/hosts',path.join("hosts.#{name}"))
-          end
-        end
-        env.active_machines.each do |name, p|
-            if provider == p
-                machines.each do |m|
-                    @logger.info "Adding entry for #{m.name} to hosts.#{name}"
-                    update_entry(m,path.join("hosts.#{name}"))
-                end
-            end
-            env.machine(name,p).communicate.upload(path.join("hosts.#{name}"), '/tmp/hosts')
-            env.machine(name,p).communicate.sudo("mv /tmp/hosts /etc/hosts")
-            FileUtils.rm(path.join("hosts.#{name}"))
-        end
+            target = env.machine(name, p)
+            next unless target.communicate.ready?
 
-      end
-
-      # delete victim machine from all guests
-      def delete_guests(victim, provider)
-        machines = []
-
-        env = victim.env
-        # create the temporary hosts file
-        path = env.tmp_path
-
-        #fetch hosts file from each machine
-        #for each machine, ensure all machine entries are updated
-        # add a hosts entry for each active machine matching the provider
-        env.active_machines.each do |name, p|
-          if provider == p
-            machines << machine = env.machine(name, provider)
-            machine.communicate.download('/etc/hosts',path.join("hosts.#{name}"))
-            delete_entry(victim,path.join("hosts.#{name}"))               
-            if machine.communicate.ready?
-                machine.env.ui.info I18n.t('vagrant_hostmanager.action.update_guest', {
-                    :name => machine.name
-                })
-                machine.communicate.upload(path.join("hosts.#{name}"), '/tmp/hosts')
-                machine.communicate.sudo("mv /tmp/hosts /etc/hosts")
-            end
-            FileUtils.rm(path.join("hosts.#{name}"))
+            file = env.tmp_path.join("hosts.#{name}")
+            target.communicate.download('/etc/hosts', file)
+            update_file(file, entries, env.tmp_path)
+            target.communicate.upload(file, '/tmp/hosts')
+            target.communicate.sudo('mv /tmp/hosts /etc/hosts')
+            FileUtils.rm(file)
           end
         end
       end
 
-
-        # define a lambda for looking up a machine's ip address
-      def  get_ip_address(machine)
-          ip = nil
-          if machine.config.hostmanager.ignore_private_ip != true
-            machine.config.vm.networks.each do |network|
-              key, options = network[0], network[1]
-              ip = options[:ip] if key == :private_network
-              next if ip
-            end
-          end
-          ip || (machine.ssh_info ? machine.ssh_info[:host] : nil)
-        end
-
-      def update_entry(machine,file_name,sudo=false)
-         delete_entry(machine,file_name,sudo)
-         
-         host = machine.config.vm.hostname || name
-         id = machine.id
-         ip = get_ip_address(machine)
-         host_aliases = machine.config.hostmanager.aliases.join("\s").chomp
-         host_entry = "#{ip}\t#{host}\s#{host_aliases}\s# VAGRANT: #{id}\n" 
-         @logger.info "Adding /etc/hosts entry: #{host_entry}"
-         temp_file_name = Dir::Tmpname.make_tmpname(File.join(machine.env.tmp_path,'hostmanager'), nil) 
-         FileUtils.cp(file_name, temp_file_name)
-         File.open(temp_file_name,'a') do |tempfile|
-             @logger.info "writing #{host_entry} to #{tempfile.path}"
-             tempfile << host_entry
-         end
-
-         if sudo == false
-            @logger.info "copy #{temp_file_name} #{file_name}"
-            FileUtils.cp(temp_file_name,file_name)
-         else
-            machine.env.ui.info I18n.t('vagrant_hostmanager.action.run_sudo')
-            @logger.warn "Running sudo to replace local hosts file, enter your local password if prompted..."
-            @logger.info `sudo cp -v #{temp_file_name} #{file_name}`
-         end
-         FileUtils.rm(temp_file_name)
-      end
-
-      def delete_entry(machine,file_name,sudo=false)
-          host = machine.config.vm.hostname || name
-          temp_file_name = Dir::Tmpname.make_tmpname(File.join(machine.env.tmp_path,'hostmanager'), nil) 
-          if not machine.id.nil?
-              tempfile = File.open(temp_file_name,'w') do |f| 
-                File.open(file_name,'r').each_line do |line|
-                  if line.match(/#{machine.id}$/).nil?
-                     f << line
-                  else
-                      @logger.info "Matched #{machine.id}"
-                  end
-                end
-              end
-              if sudo == false
-                @logger.info "copy #{temp_file_name} #{file_name}"
-                    FileUtils.cp(temp_file_name,file_name)
-              else
-                  machine.env.ui.info I18n.t('vagrant_hostmanager.action.run_sudo')
-                  @logger.info `sudo cp -v #{temp_file_name} #{file_name}`
-              end
-              FileUtils.rm(temp_file_name)
-          else
-              @logger.warn "Machine id to delete was empty, skipping..."
-          end
-      end
-
-      def update_local(machine)
-         return if machine.id.nil?
-         update_entry(machine,'/etc/hosts',true)
-      end
-
-      def delete_local(machine)
-          return if machine.id.nil?
-          delete_entry(machine,'/etc/hosts',true)
-      end
-
-      def publish_local(tempfile)
-          @logger.info `sudo cp -v #{tempfile} /etc/hosts`
-      end
-
-
-      # Copy the temporary hosts file to the specified machine overwritting
-      # the existing /etc/hosts file.
-      def update(machine)
-        path = machine.env.tmp_path.join('hosts')
-        if machine.communicate.ready?
-          machine.env.ui.info I18n.t('vagrant_hostmanager.action.update_guest', {
-            :name => machine.name
-          })
-          machine.communicate.download(path, '/etc/hosts')
-          machine.communicate.upload(path, '/tmp/hosts')
-          machine.communicate.sudo("mv /tmp/hosts /etc/hosts")
-        end
+      def update_host(env, provider)
+        entries = get_entries(env, provider)
+        file = env.tmp_path.join('hosts.local')
+        FileUtils.cp('/etc/hosts', file)
+        update_file(file, entries, env.tmp_path)
+        `sudo cp #{file} /etc/hosts`
       end
 
       private
-      # Either use the active machines, or loop over all available machines and
-      # get those with the same provider (aka, ignore boxes that throw MachineNotFound errors).
-      #
-      # Returns an array with the same structure as env.active_machines:
-      # [ [:machine, :virtualbox], [:foo, :virtualbox] ]
+
+      def update_file(file, entries, tmp_path)
+        tmp_file = Tempfile.open('hostmanager', tmp_path, 'a')
+        begin
+          File.open(file).each_line do |line|
+            tmp_file << line unless line =~ /# VAGRANT ID:/
+          end
+          entries.each { |entry| tmp_file << entry }
+        ensure
+          tmp_file.close
+          FileUtils.cp(tmp_file, file)
+          tmp_file.unlink
+        end
+      end
+
+      def get_entries(env, provider)
+        entries = []
+        get_machines(env, provider).each do |name, p|
+          if provider == p
+            machine = env.machine(name, p)
+            host = machine.config.vm.hostname || name
+            id = machine.id
+            ip = get_ip_address(machine)
+            aliases = machine.config.hostmanager.aliases.join(' ').chomp
+            entries <<  "#{ip}\t#{host} #{aliases}\t# VAGRANT ID: #{id}\n"
+          end
+        end
+
+        entries
+      end
+
+      def get_ip_address(machine)
+        ip = nil
+        if machine.config.hostmanager.ignore_private_ip != true
+          machine.config.vm.networks.each do |network|
+            key, options = network[0], network[1]
+            ip = options[:ip] if key == :private_network
+            next if ip
+          end
+        end
+        ip || (machine.ssh_info ? machine.ssh_info[:host] : nil)
+      end
+
       def get_machines(env, provider)
         if env.config_global.hostmanager.include_offline?
           machines = []
           env.machine_names.each do |name|
             begin
-              m = env.machine(name, provider)
+              env.machine(name, provider)
               machines << [name, provider]
-            rescue Vagrant::Errors::MachineNotFound => ex
-              # ignore this box.
+            rescue Vagrant::Errors::MachineNotFound
             end
           end
           machines

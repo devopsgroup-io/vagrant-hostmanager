@@ -4,14 +4,17 @@
 Vagrant.require_plugin('vagrant-hostmanager')
 
 Vagrant.configure('2') do |config|
-  config.vm.box = 'precise64-chef11.2'
-  config.vm.box_url = 'https://opscode-vm.s3.amazonaws.com/vagrant/opscode_ubuntu-12.04_chef-11.2.0.box'
+  config.vm.box = 'precise64'
+  config.vm.box_url = 'http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-vagrant-amd64-disk1.box'
 
   config.hostmanager.enabled = true
+  config.hostmanager.manage_host = true
+  config.hostmanager.include_offline = true
 
   config.vm.define :server1 do |server|
     server.vm.hostname = 'fry'
     server.vm.network :private_network, :ip => '10.0.5.2'
+    server.hostmanager.aliases = %w(test-alias)
   end
 
   config.vm.define :server2 do |server|
