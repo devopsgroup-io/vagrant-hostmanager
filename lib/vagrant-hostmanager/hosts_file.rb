@@ -26,6 +26,7 @@ module VagrantPlugins
             end
             env.machine(name,p).communicate.upload(path.join("hosts.#{name}"), '/tmp/hosts')
             env.machine(name,p).communicate.sudo("mv /tmp/hosts /etc/hosts")
+            FileUtils.rm(path.join("hosts.#{name}"))
         end
 
       end
@@ -53,6 +54,7 @@ module VagrantPlugins
                 machine.communicate.upload(path.join("hosts.#{name}"), '/tmp/hosts')
                 machine.communicate.sudo("mv /tmp/hosts /etc/hosts")
             end
+            FileUtils.rm(path.join("hosts.#{name}"))
           end
         end
       end
@@ -95,6 +97,7 @@ module VagrantPlugins
             @logger.warn "Running sudo to replace local hosts file, enter your local password if prompted..."
             @logger.info `sudo cp -v #{temp_file_name} #{file_name}`
          end
+         FileUtils.rm(temp_file_name)
       end
 
       def delete_entry(machine,file_name,sudo=false)
@@ -117,6 +120,7 @@ module VagrantPlugins
                   machine.env.ui.info I18n.t('vagrant_hostmanager.action.run_sudo')
                   @logger.info `sudo cp -v #{temp_file_name} #{file_name}`
               end
+              FileUtils.rm(temp_file_name)
           else
               @logger.warn "Machine id to delete was empty, skipping..."
           end
