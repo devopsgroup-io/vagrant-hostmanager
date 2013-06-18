@@ -22,10 +22,9 @@ module VagrantPlugins
 
         options[:provider] ||= @env.default_provider
 
-        generate(@env, options[:provider].to_sym)
-
         with_target_vms(argv, options) do |machine|
-          update(machine)
+          update_guests(machine, machine.provider_name)
+          update_local(machine)
         end
       end
     end
