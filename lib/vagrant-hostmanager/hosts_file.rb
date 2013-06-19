@@ -5,14 +5,19 @@ module VagrantPlugins
     module HostsFile
       def update_guests(env, provider)
         entries = get_entries(env, provider)
+
+        # update hosts file on each active machine with matching provider
         env.active_machines.each do |name, p|
           if provider == p
             target = env.machine(name, p)
             next unless target.communicate.ready?
 
+            # download and modify file with Vagrant-managed entries
             file = env.tmp_path.join("hosts.#{name}")
             target.communicate.download('/etc/hosts', file)
             update_file(file, entries, env.tmp_path)
+
+            # upload modified file and remove temporary file
             target.communicate.upload(file, '/tmp/hosts')
             target.communicate.sudo('mv /tmp/hosts /etc/hosts')
             FileUtils.rm(file)
@@ -22,9 +27,13 @@ module VagrantPlugins
 
       def update_host(env, provider)
         entries = get_entries(env, provider)
+
+        # copy and modify hosts file on host with Vagrant-managed entries
         file = env.tmp_path.join('hosts.local')
         FileUtils.cp('/etc/hosts', file)
         update_file(file, entries, env.tmp_path)
+
+        # copy modified file using sudo for permission
         `sudo cp #{file} /etc/hosts`
       end
 
@@ -33,9 +42,12 @@ module VagrantPlugins
       def update_file(file, entries, tmp_path)
         tmp_file = Tempfile.open('hostmanager', tmp_path, 'a')
         begin
+          # copy each line not managed by Vagrant
           File.open(file).each_line do |line|
             tmp_file << line unless line =~ /# VAGRANT ID:/
           end
+
+          # write a line for each Vagrant-managed entry
           entries.each { |entry| tmp_file << entry }
         ensure
           tmp_file.close
@@ -73,6 +85,7 @@ module VagrantPlugins
       end
 
       def get_machines(env, provider)
+        # check if offline machines should be included in host entries
         if env.config_global.hostmanager.include_offline?
           machines = []
           env.machine_names.each do |name|

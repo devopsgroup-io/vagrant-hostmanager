@@ -1,12 +1,8 @@
 en:
   vagrant_hostmanager:
     action:
-      update_guest: "[%{name}] Updating /etc/hosts file"
-      update_host: "Updating local /etc/hosts file"
-      run_sudo: "Running sudo to modify host machine's /etc/hosts file"
-      add_host: "Adding /etc/hosts entry: %{ip} %{host} %{aliases}"
-      host_no_ip: "Could not determine ip for machine '%{name}': no private ip configured or machine not up."
-      update: "[%{name}] Updating /etc/hosts file"
+      update_guests: "Updating /etc/hosts file on active guest machines..."
+      update_host: "Updating /etc/hosts file on host machine (password may be required)..."
     config:
       not_a_bool: "A value for %{config_key} can only be true or false, not type '%{value}'"
       not_an_array_or_string: "A value for %{config_key} must be an Array or String, not type '%{is_class}'"

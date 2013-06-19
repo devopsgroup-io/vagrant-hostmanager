@@ -5,8 +5,8 @@ module VagrantPlugins
     class Plugin < Vagrant.plugin('2')
       name 'HostManager'
       description <<-DESC
-        This plugin manages the /etc/hosts file for guest machines. An entry is
-        created for each active machine using the hostname attribute.
+        This plugin manages the /etc/hosts file for the host and guest machines.
+        An entry is created for each active machine using the hostname attribute.
 
         You can also use the hostmanager provisioner to update the hosts file.
       DESC
