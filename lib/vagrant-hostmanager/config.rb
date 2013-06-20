@@ -21,7 +21,7 @@ module VagrantPlugins
 
       def finalize!
         @enabled = false if @enabled == UNSET_VALUE
-        @manage_host = false if @managed_host == UNSET_VALUE
+        @manage_host = false if @manage_host == UNSET_VALUE
         @ignore_private_ip = false if @ignore_private_ip == UNSET_VALUE
         @include_offline = false if @include_offline == UNSET_VALUE
         @aliases = [ @aliases ].flatten
