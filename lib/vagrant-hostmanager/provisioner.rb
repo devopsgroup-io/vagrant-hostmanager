@@ -3,10 +3,16 @@ module VagrantPlugins
     class Provisioner < Vagrant.plugin('2', :provisioner)
       include HostsFile
 
+      def initialize(machine, config)
+        super(machine, config)
+        @global_env = machine.env
+        @provider = machine.provider_name
+      end
+
       def provision
-        update_guests(@machine.env, @machine.provider_name)
-        if @machine.env.config_global.hostmanager.manage_host?
-          update_host(@machine.env, @machine.provider_name)
+        update_guest(@machine)
+        if @global_env.config_global.hostmanager.manage_host?
+          update_host
         end
       end
     end

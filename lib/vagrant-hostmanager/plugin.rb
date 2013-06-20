@@ -1,4 +1,4 @@
-require 'vagrant-hostmanager/action/update_hosts_file'
+require 'vagrant-hostmanager/action'
 
 module VagrantPlugins
   module HostManager
@@ -17,11 +17,11 @@ module VagrantPlugins
       end
 
       action_hook(:hostmanager, :machine_action_up) do |hook|
-        hook.prepend(Action::UpdateHostsFile)
+        hook.prepend(Action.update_all)
       end
 
       action_hook(:hostmanager, :machine_action_destroy) do |hook|
-        hook.append(Action::UpdateHostsFile)
+        hook.prepend(Action.update_all)
       end
 
       provisioner(:hostmanager) do

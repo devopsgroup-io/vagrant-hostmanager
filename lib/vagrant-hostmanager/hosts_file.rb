@@ -3,35 +3,25 @@ require 'tempfile'
 module VagrantPlugins
   module HostManager
     module HostsFile
-      def update_guests(env, provider)
-        entries = get_entries(env, provider)
+      def update_guest(machine)
+        return unless machine.communicate.ready?
 
-        # update hosts file on each active machine with matching provider
-        env.active_machines.each do |name, p|
-          if provider == p
-            target = env.machine(name, p)
-            next unless target.communicate.ready?
+        # download and modify file with Vagrant-managed entries
+        file = @global_env.tmp_path.join("hosts.#{machine.name}")
+        machine.communicate.download('/etc/hosts', file)
+        update_file(file)
 
-            # download and modify file with Vagrant-managed entries
-            file = env.tmp_path.join("hosts.#{name}")
-            target.communicate.download('/etc/hosts', file)
-            update_file(file, entries, env.tmp_path)
-
-            # upload modified file and remove temporary file
-            target.communicate.upload(file, '/tmp/hosts')
-            target.communicate.sudo('mv /tmp/hosts /etc/hosts')
-            FileUtils.rm(file)
-          end
-        end
+        # upload modified file and remove temporary file
+        machine.communicate.upload(file, '/tmp/hosts')
+        machine.communicate.sudo('mv /tmp/hosts /etc/hosts')
+        FileUtils.rm(file)
       end
 
-      def update_host(env, provider)
-        entries = get_entries(env, provider)
-
+      def update_host
         # copy and modify hosts file on host with Vagrant-managed entries
-        file = env.tmp_path.join('hosts.local')
+        file = @global_env.tmp_path.join('hosts.local')
         FileUtils.cp('/etc/hosts', file)
-        update_file(file, entries, env.tmp_path)
+        update_file(file)
 
         # copy modified file using sudo for permission
         `sudo cp #{file} /etc/hosts`
@@ -39,8 +29,21 @@ module VagrantPlugins
 
       private
 
-      def update_file(file, entries, tmp_path)
-        tmp_file = Tempfile.open('hostmanager', tmp_path, 'a')
+      def update_file(file)
+        # build array of host file entries from Vagrant configuration
+        entries = []
+        get_machines.each do |name, p|
+          if @provider == p
+            machine = @global_env.machine(name, p)
+            host = machine.config.vm.hostname || name
+            id = machine.id
+            ip = get_ip_address(machine)
+            aliases = machine.config.hostmanager.aliases.join(' ').chomp
+            entries <<  "#{ip}\t#{host} #{aliases}\t# VAGRANT ID: #{id}\n"
+          end
+        end
+
+        tmp_file = Tempfile.open('hostmanager', @global_env.tmp_path, 'a')
         begin
           # copy each line not managed by Vagrant
           File.open(file).each_line do |line|
@@ -56,22 +59,6 @@ module VagrantPlugins
         end
       end
 
-      def get_entries(env, provider)
-        entries = []
-        get_machines(env, provider).each do |name, p|
-          if provider == p
-            machine = env.machine(name, p)
-            host = machine.config.vm.hostname || name
-            id = machine.id
-            ip = get_ip_address(machine)
-            aliases = machine.config.hostmanager.aliases.join(' ').chomp
-            entries <<  "#{ip}\t#{host} #{aliases}\t# VAGRANT ID: #{id}\n"
-          end
-        end
-
-        entries
-      end
-
       def get_ip_address(machine)
         ip = nil
         if machine.config.hostmanager.ignore_private_ip != true
@@ -84,20 +71,20 @@ module VagrantPlugins
         ip || (machine.ssh_info ? machine.ssh_info[:host] : nil)
       end
 
-      def get_machines(env, provider)
+      def get_machines
         # check if offline machines should be included in host entries
-        if env.config_global.hostmanager.include_offline?
+        if @global_env.config_global.hostmanager.include_offline?
           machines = []
-          env.machine_names.each do |name|
+          @global_env.machine_names.each do |name|
             begin
-              env.machine(name, provider)
-              machines << [name, provider]
+              @global_env.machine(name, @provider)
+              machines << [name, @provider]
             rescue Vagrant::Errors::MachineNotFound
             end
           end
           machines
         else
-          env.active_machines
+          @global_env.active_machines
         end
       end
 
