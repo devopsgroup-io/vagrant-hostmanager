@@ -3,6 +3,8 @@ require 'tempfile'
 module VagrantPlugins
   module HostManager
     module HostsFile
+      @@hosts_path = Vagrant::Util::Platform.windows? ? File.expand_path('system32/drivers/etc/hosts', ENV['windir']) : '/etc/hosts'
+
       def update_guest(machine)
         return unless machine.communicate.ready?
 
@@ -20,17 +22,27 @@ module VagrantPlugins
       def update_host
         # copy and modify hosts file on host with Vagrant-managed entries
         file = @global_env.tmp_path.join('hosts.local')
-        FileUtils.cp('/etc/hosts', file)
+        FileUtils.cp(@@hosts_path, file)
         update_file(file)
 
         # copy modified file using sudo for permission
-        `sudo cp #{file} /etc/hosts`
+        command = %Q(cp #{file} #{@@hosts_path})
+        if !File.writable?(@@hosts_path)
+          sudo command
+        else
+          `#{command}`
+        end
       end
 
       private
 
-      def update_file(file)
-        # build array of host file entries from Vagrant configuration
+      # TODO need to find a way to have host specific entries that apply
+      # to the configured host only
+
+      # also need to find a way to not let vagrant environments overwrite
+      # each others entries in /etc/hosts (namespace the entries)
+
+      def get_vm_entries
         entries = []
         get_machines.each do |name, p|
           if @provider == p
@@ -39,8 +51,22 @@ module VagrantPlugins
             id = machine.id
             ip = get_ip_address(machine)
             aliases = machine.config.hostmanager.aliases.join(' ').chomp
-            entries <<  "#{ip}\t#{host} #{aliases}\t# VAGRANT ID: #{id}\n"
+            entries << [ip, [host, aliases].flatten, id]
           end
+        end
+
+        @global_env.config_global.hostmanager.hosts.each do |ip, aliases|
+          entries << [ip, aliases, 'TODO: a global identifier']
+        end
+
+        entries
+      end
+
+      def update_file(file)
+        lines = []
+
+        get_vm_entries.each do |ip, aliases, id|
+          lines << "#{ip}\t#{aliases.join(' ')}\t# VAGRANT ID: #{id}\n"
         end
 
         tmp_file = Tempfile.open('hostmanager', @global_env.tmp_path, 'a')
@@ -51,7 +77,7 @@ module VagrantPlugins
           end
 
           # write a line for each Vagrant-managed entry
-          entries.each { |entry| tmp_file << entry }
+          lines.each { |line| tmp_file << line }
         ensure
           tmp_file.close
           FileUtils.cp(tmp_file, file)
@@ -85,6 +111,15 @@ module VagrantPlugins
           machines
         else
           @global_env.active_machines
+        end
+      end
+
+      def sudo(command)
+        return if !command
+        if Vagrant::Util::Platform.windows?
+          `#{command}`
+        else
+          `sudo #{command}`
         end
       end
 
