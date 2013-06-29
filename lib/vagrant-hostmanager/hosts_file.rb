@@ -44,7 +44,7 @@ module VagrantPlugins
 
       def get_vm_entries
         entries = []
-        get_machines.each do |name, p|
+        get_machines.each do |name, p, m|
           if @provider == p
             machine = @global_env.machine(name, p)
             host = machine.config.vm.hostname || name
@@ -52,6 +52,11 @@ module VagrantPlugins
             ip = get_ip_address(machine)
             aliases = machine.config.hostmanager.aliases.join(' ').chomp
             entries << [ip, [host, aliases].flatten, id]
+
+            # TODO only use extra hosts entries for this machine
+            m.config.hostmanager.hosts.each do |ip, aliases|
+              entries << ['# ' + ip, aliases, "#{id} #{name} TODO decent ids"]
+            end
           end
         end
 
@@ -103,8 +108,8 @@ module VagrantPlugins
           machines = []
           @global_env.machine_names.each do |name|
             begin
-              @global_env.machine(name, @provider)
-              machines << [name, @provider]
+              m = @global_env.machine(name, @provider)
+              machines << [name, @provider, m]
             rescue Vagrant::Errors::MachineNotFound
             end
           end

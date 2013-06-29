@@ -46,6 +46,14 @@ module VagrantPlugins
           })
         end
 
+        if !machine.config.hostmanager.hosts.kind_of?(Array)
+          errors << "Needed an array, got #{machine.config.hostmanager.hosts.inspect}:#{machine.config.hostmanager.hosts.class}"
+        end
+
+        unless @hosts.kind_of?(Array)
+          errors << "hosts should be an array"
+        end
+
         @hosts.each do |(address, aliases)|
           unless aliases.is_a? Array
             errors << "#{address} should have an array of aliases, got #{aliases.inspect}:#{aliases.class}"
@@ -55,12 +63,11 @@ module VagrantPlugins
         { 'HostManager configuration' => errors }
       end
 
-
-      def merge(other)
-        super.tap do |result|
-          result.hosts += other.hosts
-        end
-      end
+#      def merge(other)
+#        super.tap do |result|
+#          result.hosts += other.hosts
+#        end
+#      end
 
       def add_host(address, aliases)
         @hosts << [address, aliases]

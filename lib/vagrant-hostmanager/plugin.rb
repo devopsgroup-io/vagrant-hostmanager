@@ -12,6 +12,12 @@ module VagrantPlugins
       DESC
 
       config(:hostmanager) do
+        require_relative 'vm_override'
+        require_relative 'config'
+        Config
+      end
+
+      config(:hostmanager, :provisioner) do
         require_relative 'config'
         Config
       end

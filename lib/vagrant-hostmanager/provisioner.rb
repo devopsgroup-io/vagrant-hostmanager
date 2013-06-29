@@ -9,6 +9,11 @@ module VagrantPlugins
         @provider = machine.provider_name
       end
 
+#      def configure(root_config)
+#        debugger
+#        puts "STOP"
+#      end
+
       def provision
         update_guest(@machine)
         if @global_env.config_global.hostmanager.manage_host?
