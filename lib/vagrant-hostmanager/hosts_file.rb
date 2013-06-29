@@ -33,7 +33,7 @@ module VagrantPlugins
         # build array of host file entries from Vagrant configuration
         entries = []
         get_machines.each do |name, p|
-          if @provider == p
+          if "#{@provider}" == "#{p}"
             machine = @global_env.machine(name, p)
             host = machine.config.vm.hostname || name
             id = machine.id
@@ -61,12 +61,15 @@ module VagrantPlugins
 
       def get_ip_address(machine)
         ip = nil
-        if machine.config.hostmanager.ignore_private_ip != true
-          machine.config.vm.networks.each do |network|
-            key, options = network[0], network[1]
-            ip = options[:ip] if key == :private_network
-            next if ip
-          end
+        if machine.config.hostmanager.nic
+          exit_status = machine.communicate.execute("ifconfig #{machine.config.hostmanager.nic} | grep \"inet addr\" | awk -F: '{print $2}' | awk '{print $1}';") do |type, output|
+            if type == :stdout
+              ip = output.rstrip
+            end          
+          end  
+          if exit_status != 0
+            ip = nil
+          end  
         end
         ip || (machine.ssh_info ? machine.ssh_info[:host] : nil)
       end

@@ -4,6 +4,7 @@ module VagrantPlugins
       attr_accessor :enabled
       attr_accessor :manage_host
       attr_accessor :ignore_private_ip
+      attr_accessor :nic
       attr_accessor :aliases
       attr_accessor :include_offline
 
@@ -16,14 +17,23 @@ module VagrantPlugins
         @manage_host = UNSET_VALUE
         @ignore_private_ip = UNSET_VALUE
         @include_offline = UNSET_VALUE
+        @nic = UNSET_VALUE
         @aliases = []
       end
+
+      #def merge(other)
+      #  super.tap do |result|
+      #    result.nic = @nic if @nic != UNSET_VALUE and @nic != nil
+      #    result.nic = other.nic if other.nic != UNSET_VALUE and other.nic != nil
+      #  end
+      #end
 
       def finalize!
         @enabled = false if @enabled == UNSET_VALUE
         @manage_host = false if @manage_host == UNSET_VALUE
         @ignore_private_ip = false if @ignore_private_ip == UNSET_VALUE
         @include_offline = false if @include_offline == UNSET_VALUE
+        @nic = nil if @nic == UNSET_VALUE
         @aliases = [ @aliases ].flatten
       end
 
