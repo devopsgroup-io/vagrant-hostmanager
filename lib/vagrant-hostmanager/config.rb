@@ -63,12 +63,6 @@ module VagrantPlugins
         { 'HostManager configuration' => errors }
       end
 
-#      def merge(other)
-#        super.tap do |result|
-#          result.hosts += other.hosts
-#        end
-#      end
-
       def add_host(address, aliases)
         @hosts << [address, aliases]
       end
