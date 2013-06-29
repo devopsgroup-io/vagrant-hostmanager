@@ -1,5 +1,8 @@
 require 'vagrant-hostmanager/action'
 
+# ensure global hostmanager.hosts config doesn't get into VM config
+require 'vagrant-hostmanager/config/v2/loader'
+
 module VagrantPlugins
   module HostManager
     class Plugin < Vagrant.plugin('2')
@@ -12,7 +15,6 @@ module VagrantPlugins
       DESC
 
       config(:hostmanager) do
-        require_relative 'vm_override'
         require_relative 'config'
         Config
       end
