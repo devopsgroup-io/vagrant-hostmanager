@@ -31,7 +31,7 @@ module VagrantPlugins
           @global_env.active_machines.each do |name, p|
             if p == @provider
               machine = @global_env.machine(name, p)
-              update_guest(machine)
+              update_guest(machine) if machine.config.hostmanager.enabled?
             end
           end
 

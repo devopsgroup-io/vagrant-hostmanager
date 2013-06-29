@@ -12,8 +12,13 @@ module VagrantPlugins
     class VMConfig < Vagrant.plugin("2", :config)
       alias_method :orig_define, :define
       def define(name, options=nil, &block)
-#        debugger
         newblock = lambda { |config|
+          # if the hostmanager key isn't created, then no merge will be
+          # attempted for the hostmanager config, and global hosts
+          # entries will leak into each VM config
+          # This hack is to ensure that doesn't happen for the
+          # case where a VM doesn't set any hosts entries of
+          # its own
           config.hostmanager
           block.call(config)
         }        
