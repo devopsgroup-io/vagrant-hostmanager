@@ -22,7 +22,7 @@ module VagrantPlugins
 
           # check config to see if the hosts file should be update automatically
           return @app.call(env) unless @machine.config.hostmanager.enabled?
-          @logger.info 'Updating /etc/hosts file automatically'
+          @logger.info '[hostmanager] Updating hosts files automatically'
 
           @app.call(env)
 
@@ -31,7 +31,7 @@ module VagrantPlugins
           @global_env.active_machines.each do |name, p|
             if p == @provider
               machine = @global_env.machine(name, p)
-              update_guest(machine) if machine.config.hostmanager.enabled?
+              update_guest(machine)
             end
           end
 
