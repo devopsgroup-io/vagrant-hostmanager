@@ -15,11 +15,7 @@ module VagrantPlugins
         end
 
         def call(env)
-          env[:ui].info I18n.t('vagrant_hostmanager.action.update_guest', {
-            :name => @machine.name
-          })
           update_guest(@machine)
-
           @app.call(env)
         end
       end

@@ -11,6 +11,14 @@ Install the plugin following the typical Vagrant 1.1 procedure:
 
     $ vagrant plugin install vagrant-hostmanager
 
+If you're using bundler, add the following to your Gemfile
+
+    gem 'vagrant-hostsupdater', :git => 'https://github.comb/asharpe/vagrant-hostmanager'
+
+and also the following to the top of your Vagrantfile
+
+    Vagrant.require_plugin 'vagrant-hostmanager'
+
 Usage
 -----
 To update the `/etc/hosts` file on each active machine, run the following
@@ -41,6 +49,10 @@ up or have a private ip configured will be added to the hosts file.
 In addition, the `hostmanager.aliases` configuration attribute can be used
 to provide aliases for your host names.
 
+If you'd like an arbitrary hosts entry to be available to each machine (eg. for
+proxy configuration) you can use the `hostmanager.add_host` method to add any
+number of entries.
+
 Example configuration:
 
 ```ruby
@@ -49,6 +61,9 @@ Vagrant.configure("2") do |config|
   config.hostmanager.manage_host = true
   config.hostmanager.ignore_private_ip = false
   config.hostmanager.include_offline = true
+
+  config.hostmanager.add_host '192.148.42.1', ['proxy']
+
   config.vm.define 'example-box' do |node|
     node.vm.hostname = 'example-box-hostname'
     node.vm.network :private_network, ip: '192.168.42.42'

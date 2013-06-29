@@ -6,6 +6,7 @@ module VagrantPlugins
       attr_accessor :ignore_private_ip
       attr_accessor :aliases
       attr_accessor :include_offline
+      attr_reader :hosts
 
       alias_method :enabled?, :enabled
       alias_method :include_offline?, :include_offline
@@ -17,6 +18,7 @@ module VagrantPlugins
         @ignore_private_ip = UNSET_VALUE
         @include_offline = UNSET_VALUE
         @aliases = []
+        @hosts = []
       end
 
       def finalize!
@@ -40,11 +42,29 @@ module VagrantPlugins
             !machine.config.hostmanager.aliases.kind_of?(String)
           errors << I18n.t('vagrant_hostmanager.config.not_an_array_or_string', {
             :config_key => 'hostmanager.aliases',
-            :is_class   => aliases.class.to_s,
+            :is_class   => machine.config.hostmanager.aliases.class.to_s,
           })
         end
 
+        if !machine.config.hostmanager.hosts.kind_of?(Array)
+          errors << "Needed an array, got #{machine.config.hostmanager.hosts.inspect}:#{machine.config.hostmanager.hosts.class}"
+        end
+
+        unless @hosts.kind_of?(Array)
+          errors << "hosts should be an array"
+        end
+
+        @hosts.each do |(address, aliases)|
+          unless aliases.is_a? Array
+            errors << "#{address} should have an array of aliases, got #{aliases.inspect}:#{aliases.class}"
+          end
+        end
+
         { 'HostManager configuration' => errors }
+      end
+
+      def add_host(address, aliases)
+        @hosts << [address, aliases]
       end
 
       private

@@ -1,5 +1,8 @@
 require 'vagrant-hostmanager/action'
 
+# ensure global hostmanager.hosts config doesn't get into VM config
+require 'vagrant-hostmanager/config/v2/loader'
+
 module VagrantPlugins
   module HostManager
     class Plugin < Vagrant.plugin('2')
@@ -16,7 +19,16 @@ module VagrantPlugins
         Config
       end
 
+      config(:hostmanager, :provisioner) do
+        require_relative 'config'
+        Config
+      end
+
       action_hook(:hostmanager, :machine_action_up) do |hook|
+        hook.prepend(Action.update_all)
+      end
+
+      action_hook(:hostmanager, :machine_action_down) do |hook|
         hook.prepend(Action.update_all)
       end
 
