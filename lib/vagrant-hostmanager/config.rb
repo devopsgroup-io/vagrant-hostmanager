@@ -21,13 +21,6 @@ module VagrantPlugins
         @aliases = []
       end
 
-      #def merge(other)
-      #  super.tap do |result|
-      #    result.nic = @nic if @nic != UNSET_VALUE and @nic != nil
-      #    result.nic = other.nic if other.nic != UNSET_VALUE and other.nic != nil
-      #  end
-      #end
-
       def finalize!
         @enabled = false if @enabled == UNSET_VALUE
         @manage_host = false if @manage_host == UNSET_VALUE

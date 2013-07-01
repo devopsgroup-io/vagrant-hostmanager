@@ -14,7 +14,7 @@ module VagrantPlugins
       config(:hostmanager) do
         require_relative 'config'
         Config
-      end   
+      end
 
       action_hook(:hostmanager, :machine_action_up) do |hook|
         hook.prepend(Action.update_all)

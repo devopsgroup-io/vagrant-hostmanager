@@ -63,13 +63,15 @@ module VagrantPlugins
         ip = nil
         if machine.config.hostmanager.nic
           exit_status = machine.communicate.execute("ifconfig #{machine.config.hostmanager.nic} | grep \"inet addr\" | awk -F: '{print $2}' | awk '{print $1}';") do |type, output|
-            if type == :stdout
-              ip = output.rstrip
-            end          
-          end  
-          if exit_status != 0
-            ip = nil
-          end  
+            ip = output.rstrip if type == :stdout              
+          end
+          ip = nil if exit_status != 0            
+        elsif machine.config.hostmanager.ignore_private_ip != true
+          machine.config.vm.networks.each do |network|
+            key, options = network[0], network[1]
+            ip = options[:ip] if key == :private_network
+            next if ip
+          end
         end
         ip || (machine.ssh_info ? machine.ssh_info[:host] : nil)
       end
