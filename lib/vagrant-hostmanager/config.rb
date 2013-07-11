@@ -19,15 +19,13 @@ module VagrantPlugins
         @aliases = []
       end
 
-      def finalize!
+      def validate(machine)
         @enabled = false if @enabled == UNSET_VALUE
         @manage_host = false if @manage_host == UNSET_VALUE
         @ignore_private_ip = false if @ignore_private_ip == UNSET_VALUE
         @include_offline = false if @include_offline == UNSET_VALUE
         @aliases = [ @aliases ].flatten
-      end
 
-      def validate(machine)
         errors = []
 
         errors << validate_bool('hostmanager.enabled', @enabled)
