@@ -9,7 +9,7 @@ module VagrantPlugins
         # download and modify file with Vagrant-managed entries
         file = @global_env.tmp_path.join("hosts.#{machine.name}")
         machine.communicate.download('/etc/hosts', file)
-        update_file(file)
+        update_file(file, true)
 
         # upload modified file and remove temporary file
         machine.communicate.upload(file, '/tmp/hosts')
@@ -21,7 +21,7 @@ module VagrantPlugins
         # copy and modify hosts file on host with Vagrant-managed entries
         file = @global_env.tmp_path.join('hosts.local')
         FileUtils.cp('/etc/hosts', file)
-        update_file(file)
+        update_file(file, false)
 
         # copy modified file using sudo for permission
         `sudo cp #{file} /etc/hosts`
@@ -29,7 +29,7 @@ module VagrantPlugins
 
       private
 
-      def update_file(file)
+      def update_file(file, is_guest)
         # build array of host file entries from Vagrant configuration
         entries = []
         get_machines.each do |name, p|
@@ -37,7 +37,7 @@ module VagrantPlugins
             machine = @global_env.machine(name, p)
             host = machine.config.vm.hostname || name
             id = machine.id
-            ip = get_ip_address(machine)
+            ip = get_ip_address(machine, is_guest)
             aliases = machine.config.hostmanager.aliases.join(' ').chomp
             entries <<  "#{ip}\t#{host} #{aliases}\t# VAGRANT ID: #{id}\n"
           end
@@ -59,9 +59,9 @@ module VagrantPlugins
         end
       end
 
-      def get_ip_address(machine)
+      def get_ip_address(machine, is_guest)
         ip = nil
-        if machine.config.hostmanager.nic
+        if machine.config.hostmanager.nic and (is_guest || machine.config.hostmanager.use_nic_when_managing_host)
           exit_status = machine.communicate.execute("ifconfig #{machine.config.hostmanager.nic} | grep \"inet addr\" | awk -F: '{print $2}' | awk '{print $1}';") do |type, output|
             ip = output.rstrip if type == :stdout              
           end

@@ -5,6 +5,7 @@ module VagrantPlugins
       attr_accessor :manage_host
       attr_accessor :ignore_private_ip
       attr_accessor :nic
+      attr_accessor :use_nic_when_managing_host
       attr_accessor :aliases
       attr_accessor :include_offline
 
@@ -18,6 +19,7 @@ module VagrantPlugins
         @ignore_private_ip = UNSET_VALUE
         @include_offline = UNSET_VALUE
         @nic = UNSET_VALUE
+        @use_nic_when_managing_host = UNSET_VALUE
         @aliases = []
       end
 
@@ -27,6 +29,7 @@ module VagrantPlugins
         @ignore_private_ip = false if @ignore_private_ip == UNSET_VALUE
         @include_offline = false if @include_offline == UNSET_VALUE
         @nic = nil if @nic == UNSET_VALUE
+        @use_nic_when_managing_host = false if @use_nic_when_managing_host == UNSET_VALUE
         @aliases = [ @aliases ].flatten
       end
 
@@ -37,6 +40,7 @@ module VagrantPlugins
         errors << validate_bool('hostmanager.manage_host', @manage_host)
         errors << validate_bool('hostmanager.ignore_private_ip', @ignore_private_ip)
         errors << validate_bool('hostmanager.include_offline', @include_offline)
+        errors << validate_bool('hostmanager.use_nic_when_managing_host', @use_nic_when_managing_host)
         errors.compact!
 
         if !machine.config.hostmanager.aliases.kind_of?(Array) and
