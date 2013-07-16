@@ -29,10 +29,10 @@ module VagrantPlugins
         Provisioner
       end
 
-      #command(:hostmanager) do
-      #  require_relative 'command'
-      #  Command
-      #end
+      command(:hostmanager) do
+        require_relative 'command'
+        Command
+      end
     end
   end
 end
