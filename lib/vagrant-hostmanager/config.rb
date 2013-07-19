@@ -12,7 +12,7 @@ module VagrantPlugins
       alias_method :manage_host?, :manage_host
 
       def initialize
-        @enabled = UNSET_VALUE
+        @enabled = false
         @manage_host = UNSET_VALUE
         @ignore_private_ip = UNSET_VALUE
         @include_offline = UNSET_VALUE
@@ -20,7 +20,6 @@ module VagrantPlugins
       end
 
       def finalize!
-        @enabled = false if @enabled == UNSET_VALUE
         @manage_host = false if @manage_host == UNSET_VALUE
         @ignore_private_ip = false if @ignore_private_ip == UNSET_VALUE
         @include_offline = false if @include_offline == UNSET_VALUE
@@ -50,7 +49,8 @@ module VagrantPlugins
       private
 
       def validate_bool(key, value)
-        if ![TrueClass, FalseClass].include?(value.class)
+        if ![TrueClass, FalseClass].include?(value.class) &&
+           value != UNSET_VALUE
           I18n.t('vagrant_hostmanager.config.not_a_bool', {
             :config_key => key,
             :value      => value.class.to_s
