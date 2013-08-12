@@ -18,8 +18,9 @@ command:
 
     $ vagrant hostmanager
 
-The plugin may hook into the `vagrant up` and `vagrant destroy` commands
-automatically. When a machine is created or destroyed, all active
+The plugin hooks into the `vagrant up`, `vagrant destroy`, `vagrant halt`,
+`vagrant resume` and `vagrant suspend` commands automatically.
+When a machine enters or exits the running state , all active
 machines with the same provider will have their `/etc/hosts` file updated
 accordingly. Set the `hostmanager.enabled` attribute to `true` in the
 Vagrantfile to activate this behavior.

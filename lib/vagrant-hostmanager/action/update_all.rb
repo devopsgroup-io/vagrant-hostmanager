@@ -15,10 +15,14 @@ module VagrantPlugins
         end
 
         def call(env)
-          # skip if machine is already active on up action
-          return @app.call(env) if @machine.id && env[:machine_action] == :up
-          # skip if machine is not active on destroy action
-          return @app.call(env) if !@machine.id && env[:machine_action] == :destroy
+          # skip if machine is running and the action is resume or up
+          return @app.call(env) if @machine.state.id == :running && [:resume, :up].include?(env[:machine_action])
+          # skip if machine is not running and the action is destroy, halt or suspend
+          return @app.call(env) if @machine.state.id != :running && [:destroy, :halt, :suspend].include?(env[:machine_action])
+          # skip if machine is not saved and the action is resume
+          return @app.call(env) if @machine.state.id != :saved && env[:machine_action] == :resume
+          # skip if machine is not running and the action is suspend
+          return @app.call(env) if @machine.state.id != :running && env[:machine_action] == :suspend
 
           # check config to see if the hosts file should be update automatically
           return @app.call(env) unless @machine.config.hostmanager.enabled?
