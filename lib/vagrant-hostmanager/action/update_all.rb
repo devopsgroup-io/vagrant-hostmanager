@@ -21,7 +21,7 @@ module VagrantPlugins
           return @app.call(env) if !@machine.id && env[:machine_action] == :destroy
 
           # check config to see if the hosts file should be update automatically
-          return @app.call(env) unless @machine.config.hostmanager.enabled?
+          return @app.call(env) unless @global_env.config_global.hostmanager.enabled?
           @logger.info 'Updating /etc/hosts file automatically'
 
           @app.call(env)
