@@ -6,7 +6,7 @@ module VagrantPlugins
       name 'HostManager'
       description <<-DESC
         This plugin manages the /etc/hosts file for the host and guest machines.
-        An entry is created for each active machine using the hostname attribute.
+        An entry is created for each running machine using the hostname attribute.
 
         You can also use the hostmanager provisioner to update the hosts file.
       DESC
@@ -21,6 +21,18 @@ module VagrantPlugins
       end
 
       action_hook(:hostmanager, :machine_action_destroy) do |hook|
+        hook.prepend(Action.update_all)
+      end
+
+      action_hook(:hostmanager, :machine_action_halt) do |hook|
+        hook.prepend(Action.update_all)
+      end
+
+      action_hook(:hostmanager, :machine_action_resume) do |hook|
+        hook.prepend(Action.update_all)
+      end
+
+      action_hook(:hostmanager, :machine_action_suspend) do |hook|
         hook.prepend(Action.update_all)
       end
 
