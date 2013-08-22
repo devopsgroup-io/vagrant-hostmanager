@@ -72,21 +72,20 @@ module VagrantPlugins
       end
 
       def get_machines
-        machines = []
-        @global_env.machine_names.each do |name|
-          begin
-            machine = @global_env.machine(name, @provider)
-
-            # check if offline machines should be included in host entries
-            if @global_env.config_global.hostmanager.include_offline? || machine.state.id == :running 
+        if @global_env.config_global.hostmanager.include_offline?
+          machines = []
+          @global_env.machine_names.each do |name|
+            begin
+              @global_env.machine(name, @provider)
               machines << [name, @provider]
+            rescue Vagrant::Errors::MachineNotFound
             end
-          rescue Vagrant::Errors::MachineNotFound
           end
+          machines
+        else
+          @global_env.active_machines
         end
-        machines
       end
-
     end
   end
 end
