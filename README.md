@@ -5,6 +5,9 @@ file on guest machines (and optionally the host). Its goal is to enable
 resolution of multi-machine environments deployed with a cloud provider
 where IP addresses are not known in advance.
 
+*NOTE:* Version 1.1 of the plugin prematurely introduced a feature to hook into
+commands other than `vagrant up` and `vagrant destroy`. Version 1.1 broke support for some providers. Version 1.2 reverts this feature until a suitable implementation supporting all providers is available.
+
 Installation
 ------------
 Install the plugin following the typical Vagrant 1.1 procedure:
@@ -18,8 +21,8 @@ command:
 
     $ vagrant hostmanager
 
-The plugin hooks into the `vagrant up`, `vagrant destroy`, `vagrant halt`,
-`vagrant resume` and `vagrant suspend` commands automatically.
+The plugin hooks into the `vagrant up` and `vagrant destroy` commands
+automatically.
 When a machine enters or exits the running state , all active
 machines with the same provider will have their `/etc/hosts` file updated
 accordingly. Set the `hostmanager.enabled` attribute to `true` in the

@@ -24,18 +24,6 @@ module VagrantPlugins
         hook.prepend(Action.update_all)
       end
 
-      action_hook(:hostmanager, :machine_action_halt) do |hook|
-        hook.prepend(Action.update_all)
-      end
-
-      action_hook(:hostmanager, :machine_action_resume) do |hook|
-        hook.prepend(Action.update_all)
-      end
-
-      action_hook(:hostmanager, :machine_action_suspend) do |hook|
-        hook.prepend(Action.update_all)
-      end
-
       provisioner(:hostmanager) do
         require_relative 'provisioner'
         Provisioner
