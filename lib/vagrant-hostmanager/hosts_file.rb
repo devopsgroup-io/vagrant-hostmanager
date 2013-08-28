@@ -14,17 +14,29 @@ module VagrantPlugins
         # upload modified file and remove temporary file
         machine.communicate.upload(file, '/tmp/hosts')
         machine.communicate.sudo('mv /tmp/hosts /etc/hosts')
-        FileUtils.rm(file)
+        # i have no idea if this is a windows competibility issue or not, but sometimes it dosen't work on my machine
+        begin
+          FileUtils.rm(file) 
+        rescue Exception => e
+        end
       end
 
       def update_host
         # copy and modify hosts file on host with Vagrant-managed entries
         file = @global_env.tmp_path.join('hosts.local')
-        FileUtils.cp('/etc/hosts', file)
+        # add a "if windows..."
+        hosts_location = '/etc/hosts'
+        copy_cmd = 'sudo cp'
+        # handles the windows hosts file...
+        if ENV['OS'] == 'Windows_NT'
+          hosts_location = "#{ENV['WINDIR']}\\System32\\drivers\\etc\\hosts"
+          copy_cmd = 'cp'
+        end
+        FileUtils.cp(hosts_location, file)
         update_file(file)
 
         # copy modified file using sudo for permission
-        `sudo cp #{file} /etc/hosts`
+        `#{copy_cmd} #{file} #{hosts_location}`
       end
 
       private
