@@ -44,6 +44,7 @@ module VagrantPlugins
       def update_file(file)
         # build array of host file entries from Vagrant configuration
         entries = []
+        ids = []
         get_machines.each do |name, p|
           if @provider == p
             machine = @global_env.machine(name, p)
@@ -52,6 +53,7 @@ module VagrantPlugins
             ip = get_ip_address(machine)
             aliases = machine.config.hostmanager.aliases.join(' ').chomp
             entries <<  "#{ip}\t#{host} #{aliases}\t# VAGRANT ID: #{id}\n"
+            ids << id unless ids.include?(id)
           end
         end
 
@@ -59,7 +61,7 @@ module VagrantPlugins
         begin
           # copy each line not managed by Vagrant
           File.open(file).each_line do |line|
-            tmp_file << line unless line =~ /# VAGRANT ID:/
+            tmp_file << line unless ids.any? { |id| line =~ /# VAGRANT ID: #{id}/ }
           end
 
           # write a line for each Vagrant-managed entry
