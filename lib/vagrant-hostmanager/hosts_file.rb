@@ -34,12 +34,15 @@ module VagrantPlugins
         entries = []
         get_machines.each do |name, p|
           if "#{@provider}" == "#{p}"
-            machine = @global_env.machine(name, p)
-            host = machine.config.vm.hostname || name
-            id = machine.id
-            ip = get_ip_address(machine, is_guest)
-            aliases = machine.config.hostmanager.aliases.join(' ').chomp
-            entries <<  "#{ip}\t#{host} #{aliases}\t# VAGRANT ID: #{id}\n"
+            begin
+              machine = @global_env.machine(name, p)
+              host = machine.config.vm.hostname || name
+              id = machine.id
+              ip = get_ip_address(machine, is_guest)
+              aliases = machine.config.hostmanager.aliases.join(' ').chomp
+              entries <<  "#{ip}\t#{host} #{aliases}\t# VAGRANT ID: #{id}\n"
+            rescue Vagrant::Errors::MachineNotFound
+            end  
           end
         end
 
