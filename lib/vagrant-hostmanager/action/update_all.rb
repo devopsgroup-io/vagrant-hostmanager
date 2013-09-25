@@ -30,6 +30,9 @@ module VagrantPlugins
           env[:ui].info I18n.t('vagrant_hostmanager.action.update_guests')
           @global_env.active_machines.each do |name, p|
             if p == @provider
+              if machine.state.short_description != 'shutoff'
+                update_guest(machine)
+              end
               machine = @global_env.machine(name, p)
               update_guest(machine)
             end
