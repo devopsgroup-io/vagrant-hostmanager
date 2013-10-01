@@ -6,14 +6,20 @@ module VagrantPlugins
       def update_guest(machine)
         return unless machine.communicate.ready?
 
+        if (machine.communicate.test("uname -s | grep SunOS"))
+          realhostfile = '/etc/inet/hosts'
+        else 
+          realhostfile = '/etc/hosts'
+        end
+
         # download and modify file with Vagrant-managed entries
         file = @global_env.tmp_path.join("hosts.#{machine.name}")
-        machine.communicate.download('/etc/hosts', file)
+        machine.communicate.download(realhostfile, file)
         update_file(file)
 
         # upload modified file and remove temporary file
         machine.communicate.upload(file, '/tmp/hosts')
-        machine.communicate.sudo('mv /tmp/hosts /etc/hosts')
+        machine.communicate.sudo("mv /tmp/hosts #{realhostfile}")
         # i have no idea if this is a windows competibility issue or not, but sometimes it dosen't work on my machine
         begin
           FileUtils.rm(file) 
