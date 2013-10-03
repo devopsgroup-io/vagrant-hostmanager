@@ -9,14 +9,13 @@ module VagrantPlugins
         if (machine.communicate.test("uname -s | grep SunOS"))
           realhostfile = '/etc/inet/hosts'
 		  move_cmd = 'mv'
-		elsif (machine.communicate.test("uname -s | grep MINGW32_NT"))
+        elsif (machine.communicate.test("test -d $Env:SystemRoot"))
 		  realhostfile = 'C:\Windows\System32\Drivers\etc\hosts'
 		  move_cmd = 'mv -force'
         else 
           realhostfile = '/etc/hosts'
 		  move_cmd = 'mv'
         end
-
         # download and modify file with Vagrant-managed entries
         file = @global_env.tmp_path.join("hosts.#{machine.name}")
         machine.communicate.download(realhostfile, file)
