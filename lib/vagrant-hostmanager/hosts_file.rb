@@ -54,6 +54,7 @@ module VagrantPlugins
       def update_file(file)
         # build array of host file entries from Vagrant configuration
         entries = []
+        destroyed_entries = []
         ids = []
         get_machines.each do |name, p|
           if @provider == p
@@ -62,8 +63,12 @@ module VagrantPlugins
             id = machine.id
             ip = get_ip_address(machine)
             aliases = machine.config.hostmanager.aliases.join(' ').chomp
-            entries <<  "#{ip}\t#{host} #{aliases}\t# VAGRANT ID: #{id}\n"
-            ids << id unless ids.include?(id)
+            if id.nil?
+              destroyed_entries << "#{ip}\t#{host} #{aliases}"
+            else
+              entries <<  "#{ip}\t#{host} #{aliases}\t# VAGRANT ID: #{id}\n"
+              ids << id unless ids.include?(id)
+            end
           end
         end
 
@@ -71,6 +76,8 @@ module VagrantPlugins
         begin
           # copy each line not managed by Vagrant
           File.open(file).each_line do |line|
+            # Eliminate lines for machines that have been destroyed
+            next if destroyed_entries.any? { |entry| line =~ /^#{entry}\t# VAGRANT ID: .*/ }
             tmp_file << line unless ids.any? { |id| line =~ /# VAGRANT ID: #{id}/ }
           end
 
