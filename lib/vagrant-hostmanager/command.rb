@@ -13,7 +13,7 @@ module VagrantPlugins
 
           o.on('--provider provider', String,
             'Update machines with the specific provider.') do |provider|
-            options[:provider] = provider
+            options[:provider] = provider.to_sym
           end
         end
 
