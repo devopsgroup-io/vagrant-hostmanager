@@ -34,19 +34,23 @@ module VagrantPlugins
       def update_host
         # copy and modify hosts file on host with Vagrant-managed entries
         file = @global_env.tmp_path.join('hosts.local')
-        # add a "if windows..."
-        hosts_location = '/etc/hosts'
-        copy_cmd = 'sudo cp'
-        # handles the windows hosts file...
-        if ENV['SystemRoot'] != nil
+
+        if WindowsSupport.windows?
+          # lazily include windows Module
+          class << self
+            include WindowsSupport unless include? WindowsSupport
+          end
+
           hosts_location = "#{ENV['WINDIR']}\\System32\\drivers\\etc\\hosts"
-          copy_cmd = 'cp'
+          copy_proc = Proc.new { windows_copy_file(file, hosts_location) }
+        else
+          hosts_location = '/etc/hosts'
+          copy_proc = Proc.new { `sudo cp #{file} #{hosts_location}` }
         end
+
         FileUtils.cp(hosts_location, file)
         update_file(file)
-
-        # copy modified file using sudo for permission
-        `#{copy_cmd} #{file} #{hosts_location}`
+        copy_proc.call
       end
 
       private
@@ -120,6 +124,43 @@ module VagrantPlugins
           machines
         else
           @global_env.active_machines
+        end
+      end
+
+      ## Windows support for copying files, requesting elevated privileges if necessary
+      module WindowsSupport
+        def self.windows?
+          ENV['OS'] === 'Windows_NT'
+        end
+
+        require 'win32ole' if windows?
+
+        def windows_copy_file(source, dest)
+          begin
+            # First, try Ruby copy
+            FileUtils.cp(source, dest)
+          rescue Errno::EACCES
+            # Access denied, try with elevated privileges
+            windows_copy_file_elevated(source, dest)
+          end
+        end
+
+        private 
+
+        def windows_copy_file_elevated(source, dest)
+          # copy command only supports backslashes as separators
+          source, dest = [source, dest].map { |s| s.to_s.gsub(/\//, '\\') }
+          
+          # run 'cmd /C copy ...' with elevated privilege, minimized
+          copy_cmd = "copy \"#{source}\" \"#{dest}\""        
+          WIN32OLE.new('Shell.Application').ShellExecute('cmd', "/C #{copy_cmd}", nil, 'runas', 7)
+
+          # Unfortunately, ShellExecute does not give us a status code,
+          # and it is non-blocking so we can't reliably compare the file contents
+          # to see if they were copied.
+          #
+          # If the user rejects the UAC prompt, vagrant will silently continue 
+          # without updating the hostsfile.
         end
       end
     end
