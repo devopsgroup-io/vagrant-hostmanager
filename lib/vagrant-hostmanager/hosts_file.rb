@@ -58,11 +58,16 @@ module VagrantPlugins
         get_machines.each do |name, p|
           if @provider == p
             machine = @global_env.machine(name, p)
-            host = machine.config.vm.hostname || name
+            entry  = ""
+            entry += "#{get_ip_address(machine)}\t"
+            unless machine.config.hostmanager.aliases_only
+              host = machine.config.vm.hostname || name
+              entry += host              
+            end
+            entry += machine.config.hostmanager.aliases.join(' ').chomp
             id = machine.id
-            ip = get_ip_address(machine)
-            aliases = machine.config.hostmanager.aliases.join(' ').chomp
-            entries <<  "#{ip}\t#{host} #{aliases}\t# VAGRANT ID: #{id}\n"
+            entry += "\t# VAGRANT ID: #{id}\n"
+            entries <<  entry
             ids << id unless ids.include?(id)
           end
         end
