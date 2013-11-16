@@ -72,6 +72,25 @@ Use:
 config.vm.provision :hostmanager
 ```
 
+Custom IP resolver
+------------------
+
+You can customize way, how host manager resolves IP address
+for each machine. This might be handy in case of aws provider,
+where host name is stored in ssh_info hash of each machine.
+This causes generation of invalid /etc/hosts file.
+
+Custom IP resolver gives you oportunity to calculate IP address
+for each machine by yourself. For example:
+
+```ruby
+config.hostmanager.ip_resolver = proc do |vm|
+  if hostname = (vm.ssh_info && vm.ssh_info[:host])
+    `host #{hostname}`.split("\n").last[/(\d+\.\d+\.\d+\.\d+)/, 1]
+  end
+end
+```
+
 Contribute
 ----------
 Contributions are welcome.

@@ -91,12 +91,17 @@ module VagrantPlugins
       end
 
       def get_ip_address(machine)
-        ip = nil
-        if machine.config.hostmanager.ignore_private_ip != true
-          machine.config.vm.networks.each do |network|
-            key, options = network[0], network[1]
-            ip = options[:ip] if key == :private_network
-            next if ip
+        custom_ip_resolver = machine.config.hostmanager.ip_resolver
+        if custom_ip_resolver
+          custom_ip_resolver.call(machine)
+        else
+          ip = nil
+          if machine.config.hostmanager.ignore_private_ip != true
+            machine.config.vm.networks.each do |network|
+              key, options = network[0], network[1]
+              ip = options[:ip] if key == :private_network
+              next if ip
+            end
           end
         end
         ip || (machine.ssh_info ? machine.ssh_info[:host] : nil)
