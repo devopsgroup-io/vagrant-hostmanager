@@ -10,7 +10,8 @@ module VagrantPlugins
           realhostfile = '/etc/inet/hosts'
 		  move_cmd = 'mv'
         elsif (machine.communicate.test("test -d $Env:SystemRoot"))
-		  realhostfile = 'C:\Windows\System32\Drivers\etc\hosts'
+      realhostfile = "#{ENV['WINDIR']}\\System32\\drivers\\etc\\hosts"
+      
 		  move_cmd = 'mv -force'
         else 
           realhostfile = '/etc/hosts'
@@ -38,7 +39,7 @@ module VagrantPlugins
         hosts_location = '/etc/hosts'
         copy_cmd = 'sudo cp'
         # handles the windows hosts file...
-        if ENV['OS'] == 'Windows_NT'
+        if ENV['SystemRoot'] != nil
           hosts_location = "#{ENV['WINDIR']}\\System32\\drivers\\etc\\hosts"
           copy_cmd = 'cp'
         end
