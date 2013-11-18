@@ -129,8 +129,10 @@ module VagrantPlugins
 
       ## Windows support for copying files, requesting elevated privileges if necessary
       module WindowsSupport
+        require 'rbconfig'
+
         def self.windows?
-          ENV['OS'] === 'Windows_NT'
+          RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
         end
 
         require 'win32ole' if windows?
