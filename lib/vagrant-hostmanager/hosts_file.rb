@@ -8,14 +8,13 @@ module VagrantPlugins
 
         if (machine.communicate.test("uname -s | grep SunOS"))
           realhostfile = '/etc/inet/hosts'
-		  move_cmd = 'mv'
+          move_cmd = 'mv'
         elsif (machine.communicate.test("test -d $Env:SystemRoot"))
-      realhostfile = "#{ENV['WINDIR']}\\System32\\drivers\\etc\\hosts"
-      
-		  move_cmd = 'mv -force'
+          realhostfile = "#{ENV['WINDIR']}\\System32\\drivers\\etc\\hosts"
+          move_cmd = 'mv -force'
         else 
           realhostfile = '/etc/hosts'
-		  move_cmd = 'mv'
+          move_cmd = 'mv'
         end
         # download and modify file with Vagrant-managed entries
         file = @global_env.tmp_path.join("hosts.#{machine.name}")
