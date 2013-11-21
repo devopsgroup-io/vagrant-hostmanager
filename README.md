@@ -91,6 +91,22 @@ config.hostmanager.ip_resolver = proc do |vm|
 end
 ```
 
+Windows support
+---------------
+
+Hostmanager will detect Windows guests and hosts and use the appropriate 
+path for the ```hosts``` file: ```%WINDIR%\System32\drivers\etc\hosts```
+
+By default on a Windows host, the ```hosts``` file is not writable without
+elevated privileges. If hostmanager detects that it cannot overwrite the file,
+it will attempt to do so with elevated privileges, causing the 
+[UAC](http://en.wikipedia.org/wiki/User_Account_Control) prompt to appear.
+
+### UAC limitations
+
+Due to limitations caused by UAC, cancelling out of the UAC prompt will not cause any
+visible errors, however the ```hosts``` file will not be updated.
+
 Contribute
 ----------
 Contributions are welcome.
