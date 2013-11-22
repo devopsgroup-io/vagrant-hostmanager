@@ -11,6 +11,7 @@ Gem::Specification.new do |gem|
   gem.email         = ['shawn@dahlen.me']
   gem.description   = %q{A Vagrant plugin that manages the /etc/hosts file within a multi-machine environment}
   gem.summary       = gem.description
+  gem.license       = 'MIT'
 
   gem.files         = `git ls-files`.split($/)
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
