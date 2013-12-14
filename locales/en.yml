@@ -7,3 +7,4 @@ en:
     config:
       not_a_bool: "A value for %{config_key} can only be true or false, not type '%{value}'"
       not_an_array_or_string: "A value for %{config_key} must be an Array or String, not type '%{is_class}'"
+      not_a_proc: "A value for %{config_key} must be a Proc, not type '%{is_class}'"

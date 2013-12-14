@@ -6,25 +6,51 @@ module VagrantPlugins
       def update_guest(machine)
         return unless machine.communicate.ready?
 
+        if (machine.communicate.test("uname -s | grep SunOS"))
+          realhostfile = '/etc/inet/hosts'
+          move_cmd = 'mv'
+        elsif (machine.communicate.test("test -d $Env:SystemRoot"))
+          realhostfile = "#{ENV['WINDIR']}\\System32\\drivers\\etc\\hosts"
+          move_cmd = 'mv -force'
+        else 
+          realhostfile = '/etc/hosts'
+          move_cmd = 'mv'
+        end
         # download and modify file with Vagrant-managed entries
         file = @global_env.tmp_path.join("hosts.#{machine.name}")
-        machine.communicate.download('/etc/hosts', file)
-        update_file(file, true)
+        machine.communicate.download(realhostfile, file)
+        update_file(file)
 
         # upload modified file and remove temporary file
         machine.communicate.upload(file, '/tmp/hosts')
-        machine.communicate.sudo('mv /tmp/hosts /etc/hosts')
-        FileUtils.rm(file)
+        machine.communicate.sudo("#{move_cmd} /tmp/hosts #{realhostfile}")
+        # i have no idea if this is a windows competibility issue or not, but sometimes it dosen't work on my machine
+        begin
+          FileUtils.rm(file) 
+        rescue Exception => e
+        end
       end
 
       def update_host
         # copy and modify hosts file on host with Vagrant-managed entries
         file = @global_env.tmp_path.join('hosts.local')
-        FileUtils.cp('/etc/hosts', file)
-        update_file(file, false)
 
-        # copy modified file using sudo for permission
-        `sudo cp #{file} /etc/hosts`
+        if WindowsSupport.windows?
+          # lazily include windows Module
+          class << self
+            include WindowsSupport unless include? WindowsSupport
+          end
+
+          hosts_location = "#{ENV['WINDIR']}\\System32\\drivers\\etc\\hosts"
+          copy_proc = Proc.new { windows_copy_file(file, hosts_location) }
+        else
+          hosts_location = '/etc/hosts'
+          copy_proc = Proc.new { `sudo cp #{file} #{hosts_location}` }
+        end
+
+        FileUtils.cp(hosts_location, file)
+        update_file(file)
+        copy_proc.call
       end
 
       private
@@ -32,17 +58,24 @@ module VagrantPlugins
       def update_file(file, is_guest)
         # build array of host file entries from Vagrant configuration
         entries = []
+        destroyed_entries = []
+        ids = []
         get_machines.each do |name, p|
-          if "#{@provider}" == "#{p}"
+          if @provider == p
             begin
               machine = @global_env.machine(name, p)
               host = machine.config.vm.hostname || name
               id = machine.id
-              ip = get_ip_address(machine, is_guest)
+              ip = get_ip_address(machine)
               aliases = machine.config.hostmanager.aliases.join(' ').chomp
-              entries <<  "#{ip}\t#{host} #{aliases}\t# VAGRANT ID: #{id}\n"
+              if id.nil?
+                destroyed_entries << "#{ip}\t#{host} #{aliases}"
+              else
+                entries <<  "#{ip}\t#{host} #{aliases}\t# VAGRANT ID: #{id}\n"
+                ids << id unless ids.include?(id)
+              end
             rescue Vagrant::Errors::MachineNotFound
-            end  
+            end
           end
         end
 
@@ -50,7 +83,9 @@ module VagrantPlugins
         begin
           # copy each line not managed by Vagrant
           File.open(file).each_line do |line|
-            tmp_file << line unless line =~ /# VAGRANT ID:/
+            # Eliminate lines for machines that have been destroyed
+            next if destroyed_entries.any? { |entry| line =~ /^#{entry}\t# VAGRANT ID: .*/ }
+            tmp_file << line unless ids.any? { |id| line =~ /# VAGRANT ID: #{id}/ }
           end
 
           # write a line for each Vagrant-managed entry
@@ -62,25 +97,24 @@ module VagrantPlugins
         end
       end
 
-      def get_ip_address(machine, is_guest)
-        ip = nil
-        if machine.config.hostmanager.nic and (is_guest || machine.config.hostmanager.use_nic_when_managing_host)
-          exit_status = machine.communicate.execute("ifconfig #{machine.config.hostmanager.nic} | grep \"inet addr\" | awk -F: '{print $2}' | awk '{print $1}';") do |type, output|
-            ip = output.rstrip if type == :stdout              
+      def get_ip_address(machine)
+        custom_ip_resolver = machine.config.hostmanager.ip_resolver
+        if custom_ip_resolver
+          custom_ip_resolver.call(machine)
+        else
+          ip = nil
+          if machine.config.hostmanager.ignore_private_ip != true
+            machine.config.vm.networks.each do |network|
+              key, options = network[0], network[1]
+              ip = options[:ip] if key == :private_network
+              next if ip
+            end
           end
-          ip = nil if exit_status != 0            
-        elsif machine.config.hostmanager.ignore_private_ip != true
-          machine.config.vm.networks.each do |network|
-            key, options = network[0], network[1]
-            ip = options[:ip] if key == :private_network
-            next if ip
-          end
-        end
-        ip || (machine.ssh_info ? machine.ssh_info[:host] : nil)
+          ip || (machine.ssh_info ? machine.ssh_info[:host] : nil)
+        end        
       end
 
       def get_machines
-        # check if offline machines should be included in host entries
         if @global_env.config_global.hostmanager.include_offline?
           machines = []
           @global_env.machine_names.each do |name|
@@ -96,6 +130,44 @@ module VagrantPlugins
         end
       end
 
+      ## Windows support for copying files, requesting elevated privileges if necessary
+      module WindowsSupport
+        require 'rbconfig'
+
+        def self.windows?
+          RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
+        end
+
+        require 'win32ole' if windows?
+
+        def windows_copy_file(source, dest)
+          begin
+            # First, try Ruby copy
+            FileUtils.cp(source, dest)
+          rescue Errno::EACCES
+            # Access denied, try with elevated privileges
+            windows_copy_file_elevated(source, dest)
+          end
+        end
+
+        private 
+
+        def windows_copy_file_elevated(source, dest)
+          # copy command only supports backslashes as separators
+          source, dest = [source, dest].map { |s| s.to_s.gsub(/\//, '\\') }
+          
+          # run 'cmd /C copy ...' with elevated privilege, minimized
+          copy_cmd = "copy \"#{source}\" \"#{dest}\""        
+          WIN32OLE.new('Shell.Application').ShellExecute('cmd', "/C #{copy_cmd}", nil, 'runas', 7)
+
+          # Unfortunately, ShellExecute does not give us a status code,
+          # and it is non-blocking so we can't reliably compare the file contents
+          # to see if they were copied.
+          #
+          # If the user rejects the UAC prompt, vagrant will silently continue 
+          # without updating the hostsfile.
+        end
+      end
     end
   end
 end

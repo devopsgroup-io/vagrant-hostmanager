@@ -5,6 +5,9 @@ file on guest machines (and optionally the host). Its goal is to enable
 resolution of multi-machine environments deployed with a cloud provider
 where IP addresses are not known in advance.
 
+*NOTE:* Version 1.1 of the plugin prematurely introduced a feature to hook into
+commands other than `vagrant up` and `vagrant destroy`. Version 1.1 broke support for some providers. Version 1.2 reverts this feature until a suitable implementation supporting all providers is available.
+
 Installation
 ------------
 Install the plugin following the typical Vagrant 1.1 procedure:
@@ -18,8 +21,9 @@ command:
 
     $ vagrant hostmanager
 
-The plugin may hook into the `vagrant up` and `vagrant destroy` commands
-automatically. When a machine is created or destroyed, all active
+The plugin hooks into the `vagrant up` and `vagrant destroy` commands
+automatically.
+When a machine enters or exits the running state , all active
 machines with the same provider will have their `/etc/hosts` file updated
 accordingly. Set the `hostmanager.enabled` attribute to `true` in the
 Vagrantfile to activate this behavior.
@@ -67,6 +71,41 @@ Use:
 ```ruby
 config.vm.provision :hostmanager
 ```
+
+Custom IP resolver
+------------------
+
+You can customize way, how host manager resolves IP address
+for each machine. This might be handy in case of aws provider,
+where host name is stored in ssh_info hash of each machine.
+This causes generation of invalid /etc/hosts file.
+
+Custom IP resolver gives you oportunity to calculate IP address
+for each machine by yourself. For example:
+
+```ruby
+config.hostmanager.ip_resolver = proc do |vm|
+  if hostname = (vm.ssh_info && vm.ssh_info[:host])
+    `host #{hostname}`.split("\n").last[/(\d+\.\d+\.\d+\.\d+)/, 1]
+  end
+end
+```
+
+Windows support
+---------------
+
+Hostmanager will detect Windows guests and hosts and use the appropriate 
+path for the ```hosts``` file: ```%WINDIR%\System32\drivers\etc\hosts```
+
+By default on a Windows host, the ```hosts``` file is not writable without
+elevated privileges. If hostmanager detects that it cannot overwrite the file,
+it will attempt to do so with elevated privileges, causing the 
+[UAC](http://en.wikipedia.org/wiki/User_Account_Control) prompt to appear.
+
+### UAC limitations
+
+Due to limitations caused by UAC, cancelling out of the UAC prompt will not cause any
+visible errors, however the ```hosts``` file will not be updated.
 
 Contribute
 ----------
