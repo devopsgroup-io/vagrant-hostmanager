@@ -55,7 +55,7 @@ module VagrantPlugins
 
       private
 
-      def update_file(file, is_guest)
+      def update_file(file)
         # build array of host file entries from Vagrant configuration
         entries = []
         destroyed_entries = []
