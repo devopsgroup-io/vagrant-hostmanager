@@ -107,8 +107,8 @@ module VagrantPlugins
               next if ip
             end
           end
-        end
-        ip || (machine.ssh_info ? machine.ssh_info[:host] : nil)
+          ip || (machine.ssh_info ? machine.ssh_info[:host] : nil)
+        end        
       end
 
       def get_machines
