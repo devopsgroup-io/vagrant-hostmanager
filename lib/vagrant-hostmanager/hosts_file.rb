@@ -60,6 +60,7 @@ module VagrantPlugins
         entries = []
         destroyed_entries = []
         ids = []
+        hosts_aliases = []
         get_machines.each do |name, p|
           if @provider == p
             machine = @global_env.machine(name, p)
@@ -70,8 +71,9 @@ module VagrantPlugins
             if id.nil?
               destroyed_entries << "#{ip}\t#{host} #{aliases}"
             else
-              entries <<  "#{ip}\t#{host} #{aliases}\t# VAGRANT ID: #{id}\n"
+              entries << "#{ip}\t#{host} #{aliases}\t# VAGRANT ID: #{id}\n"
               ids << id unless ids.include?(id)
+              hosts_aliases << "#{host} #{aliases}"              
             end
           end
         end
@@ -82,6 +84,7 @@ module VagrantPlugins
           File.open(file).each_line do |line|
             # Eliminate lines for machines that have been destroyed
             next if destroyed_entries.any? { |entry| line =~ /^#{entry}\t# VAGRANT ID: .*/ }
+            next if hosts_aliases.any? { |host_aliases| line =~ /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s#{host_aliases}\s# VAGRANT ID:\s.*/}
             tmp_file << line unless ids.any? { |id| line =~ /# VAGRANT ID: #{id}/ }
           end
 
