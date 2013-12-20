@@ -19,7 +19,7 @@ module VagrantPlugins
         # download and modify file with Vagrant-managed entries
         file = @global_env.tmp_path.join("hosts.#{machine.name}")
         machine.communicate.download(realhostfile, file)
-        update_file(file)
+        update_file(machine, file)
 
         # upload modified file and remove temporary file
         machine.communicate.upload(file, '/tmp/hosts')
@@ -49,13 +49,13 @@ module VagrantPlugins
         end
 
         FileUtils.cp(hosts_location, file)
-        update_file(file)
+        update_file(nil, file)
         copy_proc.call
       end
 
       private
 
-      def update_file(file)
+      def update_file(current_machine, file)
         # build array of host file entries from Vagrant configuration
         entries = []
         destroyed_entries = []
@@ -65,7 +65,7 @@ module VagrantPlugins
             machine = @global_env.machine(name, p)
             host = machine.config.vm.hostname || name
             id = machine.id
-            ip = get_ip_address(machine)
+            ip = get_ip_address(current_machine, machine)
             aliases = machine.config.hostmanager.aliases.join(' ').chomp
             if id.nil?
               destroyed_entries << "#{ip}\t#{host} #{aliases}"
@@ -94,10 +94,10 @@ module VagrantPlugins
         end
       end
 
-      def get_ip_address(machine)
+      def get_ip_address(current_machine, machine)
         custom_ip_resolver = machine.config.hostmanager.ip_resolver
         if custom_ip_resolver
-          custom_ip_resolver.call(machine)
+          custom_ip_resolver.call(current_machine, machine)
         else
           ip = nil
           if machine.config.hostmanager.ignore_private_ip != true
