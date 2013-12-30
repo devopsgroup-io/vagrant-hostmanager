@@ -62,16 +62,19 @@ module VagrantPlugins
         ids = []
         get_machines.each do |name, p|
           if @provider == p
-            machine = @global_env.machine(name, p)
-            host = machine.config.vm.hostname || name
-            id = machine.id
-            ip = get_ip_address(machine)
-            aliases = machine.config.hostmanager.aliases.join(' ').chomp
-            if id.nil?
-              destroyed_entries << "#{ip}\t#{host} #{aliases}"
-            else
-              entries <<  "#{ip}\t#{host} #{aliases}\t# VAGRANT ID: #{id}\n"
-              ids << id unless ids.include?(id)
+            begin
+              machine = @global_env.machine(name, p)
+              host = machine.config.vm.hostname || name
+              id = machine.id
+              ip = get_ip_address(machine)
+              aliases = machine.config.hostmanager.aliases.join(' ').chomp
+              if id.nil?
+                destroyed_entries << "#{ip}\t#{host} #{aliases}"
+              else
+                entries <<  "#{ip}\t#{host} #{aliases}\t# VAGRANT ID: #{id}\n"
+                ids << id unless ids.include?(id)
+              end
+            rescue Vagrant::Errors::MachineNotFound
             end
           end
         end

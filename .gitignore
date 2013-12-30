@@ -2,3 +2,4 @@
 pkg
 Gemfile.lock
 test/.vagrant
+.rvmrc

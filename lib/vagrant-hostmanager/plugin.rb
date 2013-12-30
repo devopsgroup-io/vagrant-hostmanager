@@ -16,13 +16,13 @@ module VagrantPlugins
         Config
       end
 
-      action_hook(:hostmanager, :machine_action_up) do |hook|
-        hook.prepend(Action.update_all)
-      end
+      #action_hook(:hostmanager, :machine_action_up) do |hook|
+      #  hook.prepend(Action.update_all)
+      #end
 
-      action_hook(:hostmanager, :machine_action_destroy) do |hook|
-        hook.prepend(Action.update_all)
-      end
+      #action_hook(:hostmanager, :machine_action_destroy) do |hook|
+      #  hook.prepend(Action.update_all)
+      #end
 
       provisioner(:hostmanager) do
         require_relative 'provisioner'
