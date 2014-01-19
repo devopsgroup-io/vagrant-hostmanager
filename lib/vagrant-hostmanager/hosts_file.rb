@@ -97,7 +97,7 @@ module VagrantPlugins
       def get_ip_address(machine)
         custom_ip_resolver = machine.config.hostmanager.ip_resolver
         if custom_ip_resolver
-          custom_ip_resolver.call(machine)
+          ip = custom_ip_resolver.call(machine)
         else
           ip = nil
           if machine.config.hostmanager.ignore_private_ip != true
