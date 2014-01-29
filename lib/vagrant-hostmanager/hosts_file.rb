@@ -42,17 +42,22 @@ module VagrantPlugins
           end
 
           hosts_location = "#{ENV['WINDIR']}\\System32\\drivers\\etc\\hosts"
+          diff_cmd = `diff #{file} #{hosts_location}`
           copy_proc = Proc.new { windows_copy_file(file, hosts_location) }
         else
           hosts_location = '/etc/hosts'
+          diff_cmd = `fc #{file} #{hosts_location}`
           copy_proc = Proc.new { `sudo cp #{file} #{hosts_location}` }
         end
 
         FileUtils.cp(hosts_location, file)
         update_file(file)
-        copy_proc.call
+        system(diff_cmd)
+        if $?.exitstatus != 0
+          copy_proc.call
+        end
       end
-
+      
       private
 
       def update_file(file, resolving_machine=nil)
