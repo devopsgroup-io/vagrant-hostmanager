@@ -10,7 +10,13 @@ module VagrantPlugins
           realhostfile = '/etc/inet/hosts'
           move_cmd = 'mv'
         elsif (machine.communicate.test("test -d $Env:SystemRoot"))
-          realhostfile = "#{ENV['WINDIR']}\\System32\\drivers\\etc\\hosts"
+          windir = nil
+          machine.communicate.execute("echo %SYSTEMROOT%", {:shell => :cmd}) do |type, contents|
+            if type == :stdout
+              windir = contents.gsub("\r\n", '')
+            end
+          end
+          realhostfile = "#{windir}\\System32\\drivers\\etc\\hosts"
           move_cmd = 'mv -force'
         else 
           realhostfile = '/etc/hosts'
