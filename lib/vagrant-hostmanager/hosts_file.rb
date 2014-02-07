@@ -12,7 +12,7 @@ module VagrantPlugins
         elsif (machine.communicate.test("test -d $Env:SystemRoot"))
           realhostfile = "#{ENV['WINDIR']}\\System32\\drivers\\etc\\hosts"
           move_cmd = 'mv -force'
-        else 
+        else
           realhostfile = '/etc/hosts'
           move_cmd = 'mv'
         end
@@ -26,7 +26,7 @@ module VagrantPlugins
         machine.communicate.sudo("#{move_cmd} /tmp/hosts #{realhostfile}")
         # i have no idea if this is a windows competibility issue or not, but sometimes it dosen't work on my machine
         begin
-          FileUtils.rm(file) 
+          FileUtils.rm(file)
         rescue Exception => e
         end
       end
@@ -67,7 +67,7 @@ module VagrantPlugins
             id = machine.id
             ip = get_ip_address(machine, resolving_machine)
             aliases = machine.config.hostmanager.aliases.join(' ').chomp
-            if id.nil?
+            if id.nil? or id.empty?
               destroyed_entries << "#{ip}\t#{host} #{aliases}"
             else
               entries <<  "#{ip}\t#{host} #{aliases}\t# VAGRANT ID: #{id}\n"
@@ -81,7 +81,7 @@ module VagrantPlugins
           # copy each line not managed by Vagrant
           File.open(file).each_line do |line|
             # Eliminate lines for machines that have been destroyed
-            next if destroyed_entries.any? { |entry| line =~ /^#{entry}\t# VAGRANT ID: .*/ }
+            next if destroyed_entries.any? { |entry| line =~ /#{entry}\t# VAGRANT ID: .*/ }
             tmp_file << line unless ids.any? { |id| line =~ /# VAGRANT ID: #{id}/ }
           end
 
@@ -108,7 +108,7 @@ module VagrantPlugins
             end
           end
           ip || (machine.ssh_info ? machine.ssh_info[:host] : nil)
-        end        
+        end
       end
 
       def get_machines
@@ -147,21 +147,21 @@ module VagrantPlugins
           end
         end
 
-        private 
+        private
 
         def windows_copy_file_elevated(source, dest)
           # copy command only supports backslashes as separators
           source, dest = [source, dest].map { |s| s.to_s.gsub(/\//, '\\') }
-          
+
           # run 'cmd /C copy ...' with elevated privilege, minimized
-          copy_cmd = "copy \"#{source}\" \"#{dest}\""        
+          copy_cmd = "copy \"#{source}\" \"#{dest}\""
           WIN32OLE.new('Shell.Application').ShellExecute('cmd', "/C #{copy_cmd}", nil, 'runas', 7)
 
           # Unfortunately, ShellExecute does not give us a status code,
           # and it is non-blocking so we can't reliably compare the file contents
           # to see if they were copied.
           #
-          # If the user rejects the UAC prompt, vagrant will silently continue 
+          # If the user rejects the UAC prompt, vagrant will silently continue
           # without updating the hostsfile.
         end
       end
