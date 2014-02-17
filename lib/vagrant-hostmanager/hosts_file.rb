@@ -66,8 +66,6 @@ module VagrantPlugins
         header = "## vagrant-hostmanager-start#{id}\n"
         footer = "## vagrant-hostmanager-end\n"
         body = get_machines
-          .select { |name, provider| provider == @provider}
-          .collect { |name, _| @global_env.machine(name, @provider) }
           .map { |machine| get_hosts_file_entry(machine, resolving_machine) }
           .join
         get_new_content(header, footer, body, file_content) 
@@ -99,18 +97,20 @@ module VagrantPlugins
 
       def get_machines
         if @global_env.config_global.hostmanager.include_offline?
-          machines = []
-          @global_env.machine_names.each do |name|
-            begin
-              @global_env.machine(name, @provider)
-              machines << [name, @provider]
-            rescue Vagrant::Errors::MachineNotFound
-            end
-          end
-          machines
+          machines = @global_env.machine_names
         else
-          @global_env.active_machines
+          machines = @global_env.active_machines
         end
+        # Collect only machines that exist for the current provider
+        machines.collect do |name, _|
+              begin
+                machine = @global_env.machine(name, @provider)
+              rescue Vagrant::Errors::MachineNotFound
+                # ignore
+              end
+              machine
+            end
+          .reject(&:nil?)
       end
 
       def get_new_content(header, footer, body, old_content)
