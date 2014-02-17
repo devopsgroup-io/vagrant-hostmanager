@@ -19,7 +19,7 @@ module VagrantPlugins
         # download and modify file with Vagrant-managed entries
         file = @global_env.tmp_path.join("hosts.#{machine.name}")
         machine.communicate.download(realhostfile, file)
-        update_file(file, machine)
+        update_file(file, machine, false)
 
         # upload modified file and remove temporary file
         machine.communicate.upload(file, '/tmp/hosts')
@@ -55,43 +55,29 @@ module VagrantPlugins
 
       private
 
-      def update_file(file, resolving_machine=nil)
-        # build array of host file entries from Vagrant configuration
-        entries = []
-        destroyed_entries = []
-        ids = []
-        get_machines.each do |name, p|
-          if @provider == p
-            machine = @global_env.machine(name, p)
-            host = machine.config.vm.hostname || name
-            id = machine.id
-            ip = get_ip_address(machine, resolving_machine)
-            aliases = machine.config.hostmanager.aliases.join(' ').chomp
-            if id.nil?
-              destroyed_entries << "#{ip}\t#{host} #{aliases}"
-            else
-              entries <<  "#{ip}\t#{host} #{aliases}\t# VAGRANT ID: #{id}\n"
-              ids << id unless ids.include?(id)
-            end
-          end
-        end
+      def update_file(file, resolving_machine = nil, include_id = true)
+        file = Pathname.new(file)
+        new_file_content = update_content(file.read, resolving_machine, include_id)
+        file.open('w') { |io| io.write(new_file_content) }
+      end
 
-        tmp_file = Tempfile.open('hostmanager', @global_env.tmp_path, 'a')
-        begin
-          # copy each line not managed by Vagrant
-          File.open(file).each_line do |line|
-            # Eliminate lines for machines that have been destroyed
-            next if destroyed_entries.any? { |entry| line =~ /^#{entry}\t# VAGRANT ID: .*/ }
-            tmp_file << line unless ids.any? { |id| line =~ /# VAGRANT ID: #{id}/ }
-          end
+      def update_content(file_content, resolving_machine, include_id)
+        id = include_id ? " id: #{read_or_create_id}" : ""
+        header = "## vagrant-hostmanager-start#{id}\n"
+        footer = "## vagrant-hostmanager-end\n"
+        body = get_machines
+          .select { |name, provider| provider == @provider}
+          .collect { |name, _| @global_env.machine(name, @provider) }
+          .map { |machine| get_hosts_file_entry(machine, resolving_machine) }
+          .join
+        get_new_content(header, footer, body, file_content) 
+      end
 
-          # write a line for each Vagrant-managed entry
-          entries.each { |entry| tmp_file << entry }
-        ensure
-          tmp_file.close
-          FileUtils.cp(tmp_file, file)
-          tmp_file.unlink
-        end
+      def get_hosts_file_entry(machine, resolving_machine)
+        ip = get_ip_address(machine, resolving_machine)
+        host = machine.config.vm.hostname || machine.name
+        aliases = machine.config.hostmanager.aliases.join(' ').chomp
+        "#{ip}\t#{host} #{aliases}\n"
       end
 
       def get_ip_address(machine, resolving_machine)
@@ -108,7 +94,7 @@ module VagrantPlugins
             end
           end
           ip || (machine.ssh_info ? machine.ssh_info[:host] : nil)
-        end        
+        end
       end
 
       def get_machines
@@ -125,6 +111,32 @@ module VagrantPlugins
         else
           @global_env.active_machines
         end
+      end
+
+      def get_new_content(header, footer, body, old_content)
+        if body.empty?
+          block = "\n"
+        else
+          block = "\n\n" + header + body + footer + "\n"
+        end
+        # Pattern for finding existing block
+        header_pattern = Regexp.quote(header)
+        footer_pattern = Regexp.quote(footer)
+        pattern = Regexp.new("\n*#{header_pattern}.*?#{footer_pattern}\n*", Regexp::MULTILINE)
+        # Replace existing block or append
+        old_content.match(pattern) ? old_content.sub(pattern, block) : old_content.rstrip + block
+      end
+
+      def read_or_create_id
+        file = Pathname.new("#{@global_env.local_data_path}/hostmanager/id")
+        if (file.file?)
+          id = file.read.strip
+        else
+          id = SecureRandom.uuid
+          file.dirname.mkpath
+          file.open('w') { |io| io.write(id) }
+        end
+        id
       end
 
       ## Windows support for copying files, requesting elevated privileges if necessary
