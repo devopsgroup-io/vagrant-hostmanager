@@ -88,7 +88,7 @@ module VagrantPlugins
             machine.config.vm.networks.each do |network|
               key, options = network[0], network[1]
               ip = options[:ip] if key == :private_network
-              next if ip
+              break if ip
             end
           end
           ip || (machine.ssh_info ? machine.ssh_info[:host] : nil)
