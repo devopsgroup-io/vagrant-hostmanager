@@ -50,7 +50,11 @@ module VagrantPlugins
 
         FileUtils.cp(hosts_location, file)
         update_file(file)
-        copy_proc.call
+
+        #only copy if the file has changed to avoid unnecessary UAC or sudo prompts
+        if File.read(file) != File.read(hosts_location)
+          copy_proc.call
+        end
       end
 
       private
