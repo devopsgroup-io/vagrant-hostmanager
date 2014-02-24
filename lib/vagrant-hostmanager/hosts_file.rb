@@ -100,9 +100,11 @@ module VagrantPlugins
           machines = @global_env.machine_names
         else
           machines = @global_env.active_machines
+            .select { |name, provider| provider == @provider }
+            .collect { |name, provider| name }
         end
         # Collect only machines that exist for the current provider
-        machines.collect do |name, _|
+        machines.collect do |name|
               begin
                 machine = @global_env.machine(name, @provider)
               rescue Vagrant::Errors::MachineNotFound
