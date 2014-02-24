@@ -25,11 +25,13 @@ module VagrantPlugins
         # download and modify file with Vagrant-managed entries
         file = @global_env.tmp_path.join("hosts.#{machine.name}")
         machine.communicate.download(realhostfile, file)
-        update_file(file, machine, false)
+        if update_file(file, machine, false)
 
-        # upload modified file and remove temporary file
-        machine.communicate.upload(file, '/tmp/hosts')
-        machine.communicate.sudo("#{move_cmd} /tmp/hosts #{realhostfile}")
+          # upload modified file and remove temporary file
+          machine.communicate.upload(file, '/tmp/hosts')
+          machine.communicate.sudo("#{move_cmd} /tmp/hosts #{realhostfile}")
+        end
+
         # i have no idea if this is a windows competibility issue or not, but sometimes it dosen't work on my machine
         begin
           FileUtils.rm(file) 
@@ -55,10 +57,7 @@ module VagrantPlugins
         end
 
         FileUtils.cp(hosts_location, file)
-        update_file(file)
-
-        #only copy if the file has changed to avoid unnecessary UAC or sudo prompts
-        if File.read(file) != File.read(hosts_location)
+        if update_file(file)
           copy_proc.call
         end
       end
@@ -67,8 +66,10 @@ module VagrantPlugins
 
       def update_file(file, resolving_machine = nil, include_id = true)
         file = Pathname.new(file)
-        new_file_content = update_content(file.read, resolving_machine, include_id)
+        old_file_content = file.read
+        new_file_content = update_content(old_file_content, resolving_machine, include_id)
         file.open('w') { |io| io.write(new_file_content) }
+        old_file_content != new_file_content
       end
 
       def update_content(file_content, resolving_machine, include_id)
