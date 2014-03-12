@@ -11,6 +11,14 @@ module VagrantPlugins
           @machine = env[:machine]
           @global_env = @machine.env
           @provider = @machine.provider_name
+
+          # config_global is deprecated from v1.5
+          if Gem::Version.new(::Vagrant::VERSION) >= Gem::Version.new('1.5')
+            @config = @global_env.vagrantfile.config
+          else
+            @config = @global_env.config_global
+          end
+
           @logger = Log4r::Logger.new('vagrant::hostmanager::update_all')
         end
 
@@ -21,7 +29,7 @@ module VagrantPlugins
           return @app.call(env) if !@machine.id && env[:machine_action] == :destroy
 
           # check config to see if the hosts file should be update automatically
-          return @app.call(env) unless @global_env.config_global.hostmanager.enabled?
+          return @app.call(env) unless @config.hostmanager.enabled?
           @logger.info 'Updating /etc/hosts file automatically'
 
           @app.call(env)
