@@ -101,7 +101,7 @@ module VagrantPlugins
       end
 
       def get_machines
-        if @global_env.config_global.hostmanager.include_offline?
+        if @config.hostmanager.include_offline?
           machines = @global_env.machine_names
         else
           machines = @global_env.active_machines
