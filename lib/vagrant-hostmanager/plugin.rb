@@ -29,6 +29,12 @@ module VagrantPlugins
         Provisioner
       end
 
+      # Work-around for vagrant >= 1.5
+      # It breaks without a provisioner config, so we provide a dummy one
+      config(:hostmanager, :provisioner) do
+        ::Vagrant::Config::V2::DummyConfig.new
+      end
+
       command(:hostmanager) do
         require_relative 'command'
         Command
