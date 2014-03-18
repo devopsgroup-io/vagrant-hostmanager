@@ -1,6 +1,6 @@
 # Changelog
 
-## Upcoming
+## 1.4.0
 ### Features
 * supports vagrant 1.5 [[#80](https://github.com/smdahlen/vagrant-hostmanager/issues/80), [#81](https://github.com/smdahlen/vagrant-hostmanager/pull/81)]
 * only updates hosts file if contents have changed [[#78](https://github.com/smdahlen/vagrant-hostmanager/pull/78)]
@@ -11,7 +11,7 @@
 * when multiple private_networks are configured, the first one is used [[#64](https://github.com/smdahlen/vagrant-hostmanager/pull/64)]
 * destroyed machines are now removed from hosts file [[#52](https://github.com/smdahlen/vagrant-hostmanager/pull/52)]
 
-[Full diff](https://github.com/smdahlen/vagrant-hostmanager/compare/v1.3.0...master)  
+[Full diff](https://github.com/smdahlen/vagrant-hostmanager/compare/v1.3.0...v1.4.0)  
 
 
 ## 1.3.0
