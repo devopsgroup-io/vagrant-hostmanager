@@ -22,4 +22,10 @@ Vagrant.configure('2') do |config|
     server.vm.hostname = 'bender'
     server.vm.network :private_network, :ip => '10.0.5.3'
   end
+
+  config.vm.define :server3 do |server|
+    server.vm.hostname = 'leena'
+    server.vm.network :private_network, :ip => '10.0.5.4'
+    server.vm.provision :hostmanager
+  end
 end
