@@ -1,7 +1,9 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-Vagrant.require_plugin('vagrant-hostmanager')
+if Gem::Version.new(::Vagrant::VERSION) < Gem::Version.new('1.5')
+  Vagrant.require_plugin('vagrant-hostmanager')
+end
 
 Vagrant.configure('2') do |config|
   config.vm.box = 'precise64'
