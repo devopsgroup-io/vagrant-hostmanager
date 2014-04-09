@@ -24,7 +24,7 @@ module VagrantPlugins
 
         def call(env)
           # skip if machine is already active on up action
-          return @app.call(env) if @machine.id && env[:machine_action] == :up
+#          return @app.call(env) if @machine.id && env[:machine_action] == :up
           # skip if machine is not active on destroy action
           return @app.call(env) if !@machine.id && env[:machine_action] == :destroy
 

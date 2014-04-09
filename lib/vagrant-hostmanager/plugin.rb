@@ -17,7 +17,7 @@ module VagrantPlugins
       end
 
       action_hook(:hostmanager, :machine_action_up) do |hook|
-        hook.prepend(Action.update_all)
+        hook.after(Vagrant::Action::Builtin::SetHostname, Action.update_all)
       end
 
       action_hook(:hostmanager, :machine_action_destroy) do |hook|
