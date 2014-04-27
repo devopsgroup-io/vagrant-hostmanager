@@ -1,7 +1,6 @@
 module VagrantPlugins
   module HostManager
     class Command < Vagrant.plugin('2', :command)
-      include HostsFile
 
       def execute
         options = {}
