@@ -84,7 +84,9 @@ module VagrantPlugins
         ip = get_ip_address(machine, resolving_machine)
         host = machine.config.vm.hostname || machine.name
         aliases = machine.config.hostmanager.aliases.join(' ').chomp
-        "#{ip}\t#{host} #{aliases}\n"
+        if ip != nil
+          "#{ip}\t#{host} #{aliases}\n"
+        end
       end
 
       def get_ip_address(machine, resolving_machine)

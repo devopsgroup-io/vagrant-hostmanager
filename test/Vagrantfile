@@ -33,4 +33,9 @@ Vagrant.configure('2') do |config|
     server.vm.network :private_network, :ip => '10.0.5.4'
     server.vm.provision :hostmanager
   end
+
+  config.vm.define :server4 do |server|
+    server.vm.hostname = 'scruffy'
+    server.vm.provision :hostmanager
+  end
 end
