@@ -1,5 +1,13 @@
 # Changelog
 
+## Upcoming
+### Bug fixes
+* properly detect hosts file location on Windows guests [[#67](https://github.com/smdahlen/vagrant-hostmanager/pull/67)]
+* do not add host if IP cannot be determined [[#85](https://github.com/smdahlen/vagrant-hostmanager/pull/85)]
+
+[Full diff](https://github.com/smdahlen/vagrant-hostmanager/compare/v1.4.0...master)  
+
+
 ## 1.4.0
 ### Features
 * supports vagrant 1.5 [[#80](https://github.com/smdahlen/vagrant-hostmanager/issues/80), [#81](https://github.com/smdahlen/vagrant-hostmanager/pull/81)]
