@@ -18,7 +18,7 @@ module VagrantPlugins
           move_cmd = 'mv -force'
         else 
           realhostfile = '/etc/hosts'
-          move_cmd = 'mv'
+          move_cmd = 'mv -f'
         end
         # download and modify file with Vagrant-managed entries
         file = @global_env.tmp_path.join("hosts.#{machine.name}")
