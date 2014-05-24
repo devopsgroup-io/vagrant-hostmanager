@@ -96,7 +96,7 @@ Passwordless sudo
 -----------------
 
 Add  the  following snippet  to  the  sudoers  file (for  example,  to
-```/etc/sudoers.d/vagrant_hostmanager```  to   make  it   stop  asking
+```/etc/sudoers.d/vagrant_hostmanager```)  to  make   it  stop  asking
 password when updating hosts  file (replace ```/home/user``` with your
 actual home directory):
 
