@@ -92,15 +92,26 @@ config.hostmanager.ip_resolver = proc do |vm, resolving_vm|
 end
 ```
 
+Passwordless sudo
+-----------------
+
+Add  the  following snippet  to  the  sudoers  file (for  example,  to
+```/etc/sudoers.d/vagrant_hostmanager```  to   make  it   stop  asking
+password when updating hosts  file (replace ```/home/user``` with your
+actual home directory):
+
+    Cmnd_Alias VAGRANT_HOSTMANAGER_UPDATE = /bin/cp /home/user/.vagrant.d/tmp/hosts.local /etc/hosts
+    %sudo ALL=(root) NOPASSWD: VAGRANT_HOSTMANAGER_UPDATE
+
 Windows support
 ---------------
 
-Hostmanager will detect Windows guests and hosts and use the appropriate 
+Hostmanager will detect Windows guests and hosts and use the appropriate
 path for the ```hosts``` file: ```%WINDIR%\System32\drivers\etc\hosts```
 
 By default on a Windows host, the ```hosts``` file is not writable without
 elevated privileges. If hostmanager detects that it cannot overwrite the file,
-it will attempt to do so with elevated privileges, causing the 
+it will attempt to do so with elevated privileges, causing the
 [UAC](http://en.wikipedia.org/wiki/User_Account_Control) prompt to appear.
 
 ### UAC limitations
