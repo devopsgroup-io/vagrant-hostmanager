@@ -18,8 +18,6 @@ module VagrantPlugins
         @ignore_private_ip = UNSET_VALUE
         @include_offline = UNSET_VALUE
         @aliases = []
-        @aliases = Array.new
-        @include_offline = false
         @ip_resolver = nil
       end
 
