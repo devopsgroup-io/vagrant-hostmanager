@@ -4,6 +4,11 @@
 ### Bug fixes
 * properly detect hosts file location on Windows guests [[#67](https://github.com/smdahlen/vagrant-hostmanager/pull/67)]
 * do not add host if IP cannot be determined [[#85](https://github.com/smdahlen/vagrant-hostmanager/pull/85)]
+* force moving of hosts file on Linux guests [[#93](https://github.com/smdahlen/vagrant-hostmanager/pull/93)]
+* allow top-level config options (eg. `ip_resolver`) to propagate to machine configs [[#91](https://github.com/smdahlen/vagrant-hostmanager/issues/91)]
+
+### Miscelaneous
+* add passwordless sudo instructions to README[[#95](https://github.com/smdahlen/vagrant-hostmanager/pull/95)]
 
 [Full diff](https://github.com/smdahlen/vagrant-hostmanager/compare/v1.4.0...master)  
 
