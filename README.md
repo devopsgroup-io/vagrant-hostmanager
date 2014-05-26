@@ -119,6 +119,19 @@ it will attempt to do so with elevated privileges, causing the
 Due to limitations caused by UAC, cancelling out of the UAC prompt will not cause any
 visible errors, however the ```hosts``` file will not be updated.
 
+Installing development version
+------------------------------
+
+If you want to install the bleeding version of vagrant-hostmanager (*at your own risk*), you can do the following
+(requires ruby and git):
+
+```
+git clone https://github.com/smdahlen/vagrant-hostmanager.git
+cd vagrant-hostmanager
+rake gem:build
+vagrant plugin install pkg/vagrant-hostmanager-*.gem
+```
+
 Contribute
 ----------
 Contributions are welcome.
