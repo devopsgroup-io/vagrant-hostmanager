@@ -13,18 +13,22 @@ module VagrantPlugins
       alias_method :manage_host?, :manage_host
 
       def initialize
-        @enabled = false
-        @manage_host = UNSET_VALUE
-        @ignore_private_ip = UNSET_VALUE
-        @include_offline = UNSET_VALUE
-        @aliases = []
-        @ip_resolver = nil
+        @enabled            = UNSET_VALUE
+        @manage_host        = UNSET_VALUE
+        @ignore_private_ip  = UNSET_VALUE
+        @include_offline    = UNSET_VALUE
+        @aliases            = UNSET_VALUE
+        @ip_resolver        = UNSET_VALUE
       end
 
       def finalize!
-        @manage_host = false if @manage_host == UNSET_VALUE
-        @ignore_private_ip = false if @ignore_private_ip == UNSET_VALUE
-        @include_offline = false if @include_offline == UNSET_VALUE
+        @enabled            = false if @enabled == UNSET_VALUE
+        @manage_host        = false if @manage_host == UNSET_VALUE
+        @ignore_private_ip  = false if @ignore_private_ip == UNSET_VALUE
+        @include_offline    = false if @include_offline == UNSET_VALUE
+        @aliases            = [] if @aliases == UNSET_VALUE
+        @ip_resolver        = nil if @ip_resolver == UNSET_VALUE
+
         @aliases = [ @aliases ].flatten
       end
 
