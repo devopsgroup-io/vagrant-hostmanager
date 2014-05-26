@@ -8,7 +8,7 @@
 * allow top-level config options (eg. `ip_resolver`) to propagate to machine configs [[#91](https://github.com/smdahlen/vagrant-hostmanager/issues/91)]
 
 ### Miscelaneous
-* add passwordless sudo instructions to README[[#95](https://github.com/smdahlen/vagrant-hostmanager/pull/95)]
+* add passwordless sudo instructions to README [[#95](https://github.com/smdahlen/vagrant-hostmanager/pull/95)]
 
 [Full diff](https://github.com/smdahlen/vagrant-hostmanager/compare/v1.4.0...master)  
 
