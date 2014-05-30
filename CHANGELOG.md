@@ -1,6 +1,9 @@
 # Changelog
 
 ## Upcoming
+### Features
+* hostmanager now runs *before* provisioning takes place, on `up` action [[#73](https://github.com/smdahlen/vagrant-hostmanager/issues/73)]
+
 ### Bug fixes
 * properly detect hosts file location on Windows guests [[#67](https://github.com/smdahlen/vagrant-hostmanager/pull/67)]
 * do not add host if IP cannot be determined [[#85](https://github.com/smdahlen/vagrant-hostmanager/pull/85)]
