@@ -6,7 +6,16 @@ resolution of multi-machine environments deployed with a cloud provider
 where IP addresses are not known in advance.
 
 *NOTE:* Version 1.1 of the plugin prematurely introduced a feature to hook into
-commands other than `vagrant up` and `vagrant destroy`. Version 1.1 broke support for some providers. Version 1.2 reverts this feature until a suitable implementation supporting all providers is available.
+commands other than `vagrant up` and `vagrant destroy`. Version 1.1 broke support
+for some providers. Version 1.2 reverts this feature until a suitable implementation
+supporting all providers is available.
+
+***Potentially breaking change in v1.5.0:*** the running order on `vagrant up` has changed
+so that hostmanager runs before provisioning takes place.  This ensures all hostnames are 
+available to the guest when it is being provisioned 
+(see [#73](https://github.com/smdahlen/vagrant-hostmanager/issues/73)).
+Previously, hostmanager would run as the very last action.  If you depend on the old behavior, 
+see the [provisioner](#provisioner) section.
 
 Installation
 ------------
@@ -61,15 +70,26 @@ Vagrant.configure("2") do |config|
 end
 ```
 
-As a last option, you can use hostmanager as a provisioner.
-This allows you to use the provisioning order to ensure that hostmanager
-runs before or after provisioning. The provisioner will collect hosts from
-boxes with the same provider as the running box.
+### Provisioner
 
-Use:
+Starting at version 1.5.0, hostmanager runs before any provisioning occurs.  If you 
+would like hostmanager to run after or during your provisioning stage, 
+you can use hostmanager as a provisioner.  This allows you to use the provisioning 
+order to ensure that hostmanager runs when desired. The provisioner will collect
+hosts from boxes with the same provider as the running box.
+
+Example:
 
 ```ruby
+# Disable the default hostmanager behavior
+config.hostmanager.enabled = false
+
+# ... possible provisioner config before hostmanager ...
+
+# hostmanager provisioner
 config.vm.provision :hostmanager
+
+# ... possible provisioning config after hostmanager ...
 ```
 
 Custom IP resolver
