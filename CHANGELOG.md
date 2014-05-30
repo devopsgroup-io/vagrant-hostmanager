@@ -1,6 +1,6 @@
 # Changelog
 
-## Upcoming
+## 1.5.0
 ### Features
 * hostmanager now runs *before* provisioning takes place, on `up` action [[#73](https://github.com/smdahlen/vagrant-hostmanager/issues/73)]
 
@@ -13,7 +13,7 @@
 ### Miscelaneous
 * add passwordless sudo instructions to README [[#95](https://github.com/smdahlen/vagrant-hostmanager/pull/95)]
 
-[Full diff](https://github.com/smdahlen/vagrant-hostmanager/compare/v1.4.0...master)  
+[Full diff](https://github.com/smdahlen/vagrant-hostmanager/compare/v1.4.0...v1.5.0)  
 
 
 ## 1.4.0
