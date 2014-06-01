@@ -1,16 +1,8 @@
 require 'tempfile'
-require 'vagrant-hostmanager/hosts_file/updater'
 
 module VagrantPlugins
   module HostManager
     module HostsFile
-      def update_guest(machine)
-        Updater.new(@global_env, @provider).update_guest(machine)
-      end
-
-      def update_host
-        Updater.new(@global_env, @provider).update_host
-      end
 
       class Updater
 
@@ -33,7 +25,7 @@ module VagrantPlugins
             end
             realhostfile = "#{windir}\\System32\\drivers\\etc\\hosts"
             move_cmd = 'mv -force'
-          else 
+          else
             realhostfile = '/etc/hosts'
             move_cmd = 'mv -f'
           end
@@ -49,7 +41,7 @@ module VagrantPlugins
 
           # i have no idea if this is a windows competibility issue or not, but sometimes it dosen't work on my machine
           begin
-            FileUtils.rm(file) 
+            FileUtils.rm(file)
           rescue Exception => e
           end
         end
@@ -94,15 +86,15 @@ module VagrantPlugins
           body = get_machines
             .map { |machine| get_hosts_file_entry(machine, resolving_machine) }
             .join
-          get_new_content(header, footer, body, file_content) 
+          get_new_content(header, footer, body, file_content)
         end
 
         def get_hosts_file_entry(machine, resolving_machine)
           ip = get_ip_address(machine, resolving_machine)
           host = machine.config.vm.hostname || machine.name
-          aliases = machine.config.hostmanager.aliases
+          aliases = machine.config.hostmanager.aliases.join(' ').chomp
           if ip != nil
-            "#{ip}\t#{host}\n" + aliases.map{|a| "#{ip}\t#{a}"}.join("\n") + "\n"
+            "#{ip}\t#{host} #{aliases}\n"
           end
         end
 
@@ -189,21 +181,21 @@ module VagrantPlugins
             end
           end
 
-          private 
+          private
 
           def windows_copy_file_elevated(source, dest)
             # copy command only supports backslashes as separators
             source, dest = [source, dest].map { |s| s.to_s.gsub(/\//, '\\') }
-            
+
             # run 'cmd /C copy ...' with elevated privilege, minimized
-            copy_cmd = "copy \"#{source}\" \"#{dest}\""        
+            copy_cmd = "copy \"#{source}\" \"#{dest}\""
             WIN32OLE.new('Shell.Application').ShellExecute('cmd', "/C #{copy_cmd}", nil, 'runas', 7)
 
             # Unfortunately, ShellExecute does not give us a status code,
             # and it is non-blocking so we can't reliably compare the file contents
             # to see if they were copied.
             #
-            # If the user rejects the UAC prompt, vagrant will silently continue 
+            # If the user rejects the UAC prompt, vagrant will silently continue
             # without updating the hostsfile.
           end
         end
