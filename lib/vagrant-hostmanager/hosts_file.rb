@@ -5,18 +5,18 @@ module VagrantPlugins
     module HostsFile
 
       def update_guest(machine)
-        Updater.new(@global_env, @config, @provider).update_guest(machine)
+        Updater.new(@global_env, @provider).update_guest(machine)
       end
 
       def update_host
-        Updater.new(@global_env, @config, @provider).update_host
+        Updater.new(@global_env, @provider).update_host
       end
 
       class Updater
 
-        def initialize(global_env, config, provider)
+        def initialize(global_env, provider)
           @global_env = global_env
-          @config = config
+          @config = Util.get_config(@global_env)
           @provider = provider
         end
 
