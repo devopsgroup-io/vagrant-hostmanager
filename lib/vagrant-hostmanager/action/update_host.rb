@@ -1,4 +1,5 @@
 require 'vagrant-hostmanager/hosts_file'
+require 'vagrant-hostmanager/util'
 
 module VagrantPlugins
   module HostManager
@@ -10,14 +11,7 @@ module VagrantPlugins
           @app = app
           @global_env = env[:global_env]
           @provider = env[:provider]
-
-          # config_global is deprecated from v1.5
-          if Gem::Version.new(::Vagrant::VERSION) >= Gem::Version.new('1.5')
-            @config = @global_env.vagrantfile.config
-          else
-            @config = @global_env.config_global
-          end
-
+          @config = Util.get_config(@global_env)
           @logger = Log4r::Logger.new('vagrant::hostmanager::update_host')
         end
 
