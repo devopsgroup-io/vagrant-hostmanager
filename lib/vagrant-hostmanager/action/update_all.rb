@@ -1,11 +1,10 @@
-require 'vagrant-hostmanager/hosts_file'
+require 'vagrant-hostmanager/hosts_file/updater'
 require 'vagrant-hostmanager/util'
 
 module VagrantPlugins
   module HostManager
     module Action
       class UpdateAll
-        include HostsFile
 
         def initialize(app, env)
           @app = app
@@ -13,6 +12,7 @@ module VagrantPlugins
           @global_env = @machine.env
           @provider = @machine.provider_name
           @config = Util.get_config(@global_env)
+          @updater = HostsFile::Updater.new(@global_env, @provider)
           @logger = Log4r::Logger.new('vagrant::hostmanager::update_all')
         end
 
@@ -31,14 +31,14 @@ module VagrantPlugins
           @global_env.active_machines.each do |name, p|
             if p == @provider
               machine = @global_env.machine(name, p)
-              update_guest(machine)
+              @updater.update_guest(machine)
             end
           end
 
           # update /etc/hosts files on host if enabled
           if @machine.config.hostmanager.manage_host?
             env[:ui].info I18n.t('vagrant_hostmanager.action.update_host')
-            update_host
+            @updater.update_host
           end
         end
       end

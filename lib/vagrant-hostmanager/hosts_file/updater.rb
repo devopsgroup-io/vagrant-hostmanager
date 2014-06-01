@@ -92,9 +92,9 @@ module VagrantPlugins
         def get_hosts_file_entry(machine, resolving_machine)
           ip = get_ip_address(machine, resolving_machine)
           host = machine.config.vm.hostname || machine.name
-          aliases = machine.config.hostmanager.aliases.join(' ').chomp
+          aliases = machine.config.hostmanager.aliases
           if ip != nil
-            "#{ip}\t#{host} #{aliases}\n"
+            "#{ip}\t#{host}\n" + aliases.map{|a| "#{ip}\t#{a}"}.join("\n") + "\n"
           end
         end
 
