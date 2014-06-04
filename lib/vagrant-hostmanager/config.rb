@@ -5,6 +5,7 @@ module VagrantPlugins
       attr_accessor :manage_host
       attr_accessor :ignore_private_ip
       attr_accessor :aliases
+      attr_accessor :alias_rows
       attr_accessor :include_offline
       attr_accessor :ip_resolver
 
@@ -18,6 +19,7 @@ module VagrantPlugins
         @ignore_private_ip  = UNSET_VALUE
         @include_offline    = UNSET_VALUE
         @aliases            = UNSET_VALUE
+        @alias_rows         = UNSET_VALUE
         @ip_resolver        = UNSET_VALUE
       end
 
@@ -27,6 +29,7 @@ module VagrantPlugins
         @ignore_private_ip  = false if @ignore_private_ip == UNSET_VALUE
         @include_offline    = false if @include_offline == UNSET_VALUE
         @aliases            = [] if @aliases == UNSET_VALUE
+        @alias_rows         = [] if @alias_rows == UNSET_VALUE
         @ip_resolver        = nil if @ip_resolver == UNSET_VALUE
 
         @aliases = [ @aliases ].flatten
@@ -58,8 +61,31 @@ module VagrantPlugins
           })
         end
 
+        if !machine.config.hostmanager.alias_rows.nil?
+          machine.config.hostmanager.alias_rows.each { |row|
+            if !row[0].kind_of?(String)
+              errors << I18n.t('vagrant_hostmanager.config.not_a_string', {
+                :config_key => 'first parameter of hostmanager.alias_rows',
+                :is_class   => row[0].class.to_s,
+              })
+            end
+
+            if !row[1].kind_of?(Hash)
+              errors << I18n.t('vagrant_hostmanager.config.not_a_hash', {
+                :config_key => 'second parameter of hostmanager.alias_rows',
+                :is_class   => row[1].class.to_s,
+              })
+            end
+          }
+        end
+
         errors.compact!
         { "HostManager configuration" => errors }
+      end
+
+      def alias(hostname, options = {})
+        @alias_rows = [] if @alias_rows == UNSET_VALUE
+        @alias_rows << [hostname, options]
       end
 
       private

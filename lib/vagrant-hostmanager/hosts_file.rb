@@ -75,17 +75,22 @@ module VagrantPlugins
         header = "## vagrant-hostmanager-start#{id}\n"
         footer = "## vagrant-hostmanager-end\n"
         body = get_machines
-          .map { |machine| get_hosts_file_entry(machine, resolving_machine) }
+          .map { |machine| get_hosts_file_entries(machine, resolving_machine) }
           .join
         get_new_content(header, footer, body, file_content) 
       end
 
-      def get_hosts_file_entry(machine, resolving_machine)
+      def get_hosts_file_entries(machine, resolving_machine)
         ip = get_ip_address(machine, resolving_machine)
         host = machine.config.vm.hostname || machine.name
         aliases = machine.config.hostmanager.aliases.join(' ').chomp
+        alias_rows = machine.config.hostmanager.alias_rows
+          .map { |row| "#{row[1][:ip] || ip}\t#{row[0]}\n" }
+          .join
         if ip != nil
-          "#{ip}\t#{host} #{aliases}\n"
+          "#{ip}\t#{host} #{aliases}\n#{alias_rows}"
+        elsif !alias_rows.empty?
+          alias_rows
         end
       end
 
