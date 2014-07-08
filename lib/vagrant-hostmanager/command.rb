@@ -3,6 +3,11 @@ module VagrantPlugins
     class Command < Vagrant.plugin('2', :command)
       include HostsFile
 
+      # Show description when `vagrant list-commands` is triggered
+      def self.synopsis
+        "manages the /etc/hosts file within a multi-machine environment"
+      end
+
       def execute
         options = {}
         opts = OptionParser.new do |o|
