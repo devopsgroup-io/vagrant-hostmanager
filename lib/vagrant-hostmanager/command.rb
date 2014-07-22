@@ -1,7 +1,6 @@
 module VagrantPlugins
   module HostManager
     class Command < Vagrant.plugin('2', :command)
-      include HostsFile
 
       # Show description when `vagrant list-commands` is triggered
       def self.synopsis

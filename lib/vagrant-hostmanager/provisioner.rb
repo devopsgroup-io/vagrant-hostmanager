@@ -1,19 +1,20 @@
+require 'vagrant-hostmanager/hosts_file/updater'
+
 module VagrantPlugins
   module HostManager
     class Provisioner < Vagrant.plugin('2', :provisioner)
-      include HostsFile
 
       def initialize(machine, config)
         super(machine, config)
-        @global_env = machine.env
-        @provider = machine.provider_name
-        @config = Util.get_config(@global_env)
+        global_env = machine.env
+        @config = Util.get_config(global_env)
+        @updater = HostsFile::Updater.new(global_env, machine.provider_name)
       end
 
       def provision
-        update_guest(@machine)
+        @updater.update_guest(@machine)
         if @config.hostmanager.manage_host?
-          update_host
+          @updater.update_host
         end
       end
     end

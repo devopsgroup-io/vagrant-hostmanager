@@ -1,18 +1,15 @@
-require 'vagrant-hostmanager/hosts_file'
+require 'vagrant-hostmanager/hosts_file/updater'
 require 'vagrant-hostmanager/util'
 
 module VagrantPlugins
   module HostManager
     module Action
       class UpdateGuest
-        include HostsFile
 
         def initialize(app, env)
           @app = app
           @machine = env[:machine]
-          @global_env = @machine.env
-          @provider = env[:provider]
-          @config = Util.get_config(@global_env)
+          @updater = HostsFile::Updater.new(@machine.env, env[:provider])
           @logger = Log4r::Logger.new('vagrant::hostmanager::update_guest')
         end
 
@@ -20,7 +17,7 @@ module VagrantPlugins
           env[:ui].info I18n.t('vagrant_hostmanager.action.update_guest', {
             :name => @machine.name
           })
-          update_guest(@machine)
+          @updater.update_guest(@machine)
 
           @app.call(env)
         end
