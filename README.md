@@ -54,6 +54,19 @@ up or have a private ip configured will be added to the hosts file.
 In addition, the `hostmanager.aliases` configuration attribute can be used
 to provide aliases for your host names.
 
+If you set the `fqdn_friendly` configuration attribute, the /etc/hosts file
+will be setup so that fully qualified domain names work properly. This fixes
+the `127.0.0.1` line so that the hostname isn't present, and if the
+`domain_name` configuration attribute is set to your domain name, it ensures
+that all the added host entries have the:
+
+```
+<ip> <fqdn> <hostname>
+```
+
+format. This is needed so that `hostname --fqdn` and `facter -p | grep fqdn`
+both work.
+
 Example configuration:
 
 ```ruby
@@ -62,6 +75,8 @@ Vagrant.configure("2") do |config|
   config.hostmanager.manage_host = true
   config.hostmanager.ignore_private_ip = false
   config.hostmanager.include_offline = true
+  config.hostmanager.fqdn_friendly = true
+  config.hostmanager.domain_name = 'example.com'
   config.vm.define 'example-box' do |node|
     node.vm.hostname = 'example-box-hostname'
     node.vm.network :private_network, ip: '192.168.42.42'
