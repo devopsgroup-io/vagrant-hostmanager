@@ -9,6 +9,7 @@ module VagrantPlugins
       attr_accessor :ip_resolver
       attr_accessor :fqdn_friendly
       attr_accessor :domain_name
+      attr_accessor :extra_hosts
 
       alias_method :enabled?, :enabled
       alias_method :include_offline?, :include_offline
@@ -23,6 +24,7 @@ module VagrantPlugins
         @ip_resolver        = UNSET_VALUE
         @fqdn_friendly      = UNSET_VALUE
         @domain_name        = UNSET_VALUE
+        @extra_hosts        = UNSET_VALUE
       end
 
       def finalize!
@@ -34,6 +36,7 @@ module VagrantPlugins
         @ip_resolver        = nil if @ip_resolver == UNSET_VALUE
         @fqdn_friendly      = false if @fqdn_friendly == UNSET_VALUE
         @domain_name        = '' if @domain_name == UNSET_VALUE
+        @extra_hosts        = [] if @extra_hosts == UNSET_VALUE
 
         @aliases = [ @aliases ].flatten
       end

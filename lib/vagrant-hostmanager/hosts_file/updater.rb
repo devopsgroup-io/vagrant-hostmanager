@@ -143,10 +143,16 @@ module VagrantPlugins
         end
 
         def get_new_content(header, footer, body, old_content)
+
+          extras = ''
+          @config.hostmanager.extra_hosts.each do |x|
+            extras+= ("#{x[:ip]}\t#{x[:host]}\t" + x[:aliases].join("\t") + "\n")
+          end
+
           if body.empty?
-            block = "\n"
+            block = "\n" + extras
           else
-            block = "\n\n" + header + body + footer + "\n"
+            block = "\n\n" + header + body + extras + footer + "\n"
           end
           # Pattern for finding existing block
           header_pattern = Regexp.quote(header)

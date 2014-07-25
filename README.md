@@ -67,6 +67,13 @@ that all the added host entries have the:
 format. This is needed so that `hostname --fqdn` and `facter -p | grep fqdn`
 both work.
 
+If you set the `extra_hosts` configuration attribute, each hash in that list
+will be used to add additional elements to each /etc/hosts file. This is useful
+for defining a virtual IP, which doesn't correspond to a particular physical
+host, but which requires a DNS entry. Each element in the `extra_hosts` list
+should be a hash with three keys: `:ip`, `:host`, and `:aliases`. The first two
+should be strings, while the third should be a list of strings.
+
 Example configuration:
 
 ```ruby
@@ -77,6 +84,13 @@ Vagrant.configure("2") do |config|
   config.hostmanager.include_offline = true
   config.hostmanager.fqdn_friendly = true
   config.hostmanager.domain_name = 'example.com'
+  config.hostmanager.extra_hosts = [
+    {
+      :host => 'vip.example.com',
+      :ip => '192.168.42.253',
+      :aliases => ['vip'],
+    },
+  ]
   config.vm.define 'example-box' do |node|
     node.vm.hostname = 'example-box-hostname'
     node.vm.network :private_network, ip: '192.168.42.42'
