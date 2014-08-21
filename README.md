@@ -42,7 +42,7 @@ attribute to `true`.
 
 A machine's IP address is defined by either the static IP for a private
 network configuration or by the SSH host configuration. To disable
-using the private network IP address, set `config.hostmanger.ignore_private_ip`
+using the private network IP address, set `config.hostmanager.ignore_private_ip`
 to true.
 
 A machine's host name is defined by `config.vm.hostname`. If this is not
