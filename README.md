@@ -72,8 +72,8 @@ end
 
 ### Provisioner
 
-Starting at version 1.5.0, hostmanager runs before any provisioning occurs.  If you 
-would like hostmanager to run after or during your provisioning stage, 
+Starting at version 1.5.0, `vagrant up` runs hostmanager before any provisioning occurs. 
+If you would like hostmanager to run after or during your provisioning stage, 
 you can use hostmanager as a provisioner.  This allows you to use the provisioning 
 order to ensure that hostmanager runs when desired. The provisioner will collect
 hosts from boxes with the same provider as the running box.
