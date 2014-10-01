@@ -1,3 +1,5 @@
+require 'rbconfig'
+
 module VagrantPlugins
   module HostManager
     class Config < Vagrant.plugin('2', :config)
@@ -7,6 +9,7 @@ module VagrantPlugins
       attr_accessor :aliases
       attr_accessor :include_offline
       attr_accessor :ip_resolver
+      attr_accessor :path_to_cp
 
       alias_method :enabled?, :enabled
       alias_method :include_offline?, :include_offline
@@ -19,6 +22,7 @@ module VagrantPlugins
         @include_offline    = UNSET_VALUE
         @aliases            = UNSET_VALUE
         @ip_resolver        = UNSET_VALUE
+        @path_to_cp         = '/bin/cp'
       end
 
       def finalize!
@@ -28,6 +32,7 @@ module VagrantPlugins
         @include_offline    = false if @include_offline == UNSET_VALUE
         @aliases            = [] if @aliases == UNSET_VALUE
         @ip_resolver        = nil if @ip_resolver == UNSET_VALUE
+        @path_to_cp         = nil if @path_to_cp == UNSET_VALUE
 
         @aliases = [ @aliases ].flatten
       end
@@ -39,6 +44,9 @@ module VagrantPlugins
         errors << validate_bool('hostmanager.manage_host', @manage_host)
         errors << validate_bool('hostmanager.ignore_private_ip', @ignore_private_ip)
         errors << validate_bool('hostmanager.include_offline', @include_offline)
+        if !RbConfig::CONFIG['host_os'].match('windows')
+          errors << validate_path_to_file('hostmanager.path_to_cp', @path_to_cp)
+        end
         errors.compact!
 
         # check if aliases option is an Array
@@ -75,6 +83,19 @@ module VagrantPlugins
           nil
         end
       end
+
+      def validate_path_to_file(key, value)
+        if !File.file?(value) &&
+           value != UNSET_VALUE
+          I18n.t('vagrant_hostmanager.config.not_a_file', {
+            :config_key => key,
+            :value      => value
+          })
+        else
+          nil
+        end
+      end
+
     end
   end
 end

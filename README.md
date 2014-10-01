@@ -38,7 +38,9 @@ accordingly. Set the `hostmanager.enabled` attribute to `true` in the
 Vagrantfile to activate this behavior.
 
 To update the host's `/etc/hosts` file, set the `hostmanager.manage_host`
-attribute to `true`.
+attribute to `true`. On POSIX systems cp is used to manage this file. The
+path to cp on your system can given by setting `hostmanager.path_to_cp` 
+to something like `/bin/cp` (default value).
 
 A machine's IP address is defined by either the static IP for a private
 network configuration or by the SSH host configuration. To disable
@@ -62,6 +64,8 @@ Vagrant.configure("2") do |config|
   config.hostmanager.manage_host = true
   config.hostmanager.ignore_private_ip = false
   config.hostmanager.include_offline = true
+  config.hostmanager.path_to_cp = "/bin/cp"
+
   config.vm.define 'example-box' do |node|
     node.vm.hostname = 'example-box-hostname'
     node.vm.network :private_network, ip: '192.168.42.42'
