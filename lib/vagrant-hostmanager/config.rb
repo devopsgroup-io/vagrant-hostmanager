@@ -3,6 +3,7 @@ module VagrantPlugins
     class Config < Vagrant.plugin('2', :config)
       attr_accessor :enabled
       attr_accessor :manage_host
+      attr_accessor :manage_guest
       attr_accessor :ignore_private_ip
       attr_accessor :aliases
       attr_accessor :include_offline
@@ -11,10 +12,12 @@ module VagrantPlugins
       alias_method :enabled?, :enabled
       alias_method :include_offline?, :include_offline
       alias_method :manage_host?, :manage_host
+      alias_method :manage_guest?, :manage_guest
 
       def initialize
         @enabled            = UNSET_VALUE
         @manage_host        = UNSET_VALUE
+        @manage_guest       = UNSET_VALUE
         @ignore_private_ip  = UNSET_VALUE
         @include_offline    = UNSET_VALUE
         @aliases            = UNSET_VALUE
@@ -24,6 +27,7 @@ module VagrantPlugins
       def finalize!
         @enabled            = false if @enabled == UNSET_VALUE
         @manage_host        = false if @manage_host == UNSET_VALUE
+        @manage_guest       = false if @manage_guest == UNSET_VALUE
         @ignore_private_ip  = false if @ignore_private_ip == UNSET_VALUE
         @include_offline    = false if @include_offline == UNSET_VALUE
         @aliases            = [] if @aliases == UNSET_VALUE
@@ -37,6 +41,7 @@ module VagrantPlugins
 
         errors << validate_bool('hostmanager.enabled', @enabled)
         errors << validate_bool('hostmanager.manage_host', @manage_host)
+        errors << validate_bool('hostmanager.manage_guest', @manage_guest)
         errors << validate_bool('hostmanager.ignore_private_ip', @ignore_private_ip)
         errors << validate_bool('hostmanager.include_offline', @include_offline)
         errors.compact!

@@ -16,6 +16,7 @@ Vagrant.configure('2') do |config|
 
   config.hostmanager.enabled = true
   config.hostmanager.manage_host = true
+  config.hostmanager.manage_guest = true
 
   config.vm.define :server1 do |server|
     server.vm.hostname = 'fry'
