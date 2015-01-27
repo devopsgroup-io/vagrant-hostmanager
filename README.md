@@ -72,7 +72,8 @@ end
 
 ### Using with DHCP
 
-Sometimes the development box's ip isn't needed, and just assigning it a domain is all that is needed.  If that's the case vagrant can rely on DHCP to assign the IP, and vagrant-hostmanager to setup the hosts file.  Below is an example of this.
+Sometimes the development box's ip isn't needed, and just assigning it a domain is all that is required.  If that's the case vagrant can rely on DHCP to assign the IP, and vagrant-hostmanager to setup the hosts file.  
+The below example creates a vagrant box with a dynamically allocated IP, then queries the box for the IP to add to the host computer's hosts file, associating the domain 'development-test.local' with the vagrant box's IP.
 
 ```ruby
 Vagrant.configure(2) do |config|
