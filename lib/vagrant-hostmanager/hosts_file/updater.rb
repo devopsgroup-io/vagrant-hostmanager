@@ -75,7 +75,7 @@ module VagrantPlugins
           file = Pathname.new(file)
           old_file_content = file.read
           new_file_content = update_content(old_file_content, resolving_machine, include_id)
-          file.open('w') { |io| io.write(new_file_content) }
+          file.open('wb') { |io| io.write(new_file_content) }
           old_file_content != new_file_content
         end
 
