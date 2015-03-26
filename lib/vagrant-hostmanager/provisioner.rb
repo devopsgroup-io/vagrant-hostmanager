@@ -12,7 +12,12 @@ module VagrantPlugins
       end
 
       def provision
-        @updater.update_guest(@machine)
+        @global_env.active_machines.each do |name, p|
+          if p == @provider
+            machine = @global_env.machine(name, p)
+            @updater.update_guest(machine)
+          end
+        end
         if @config.hostmanager.manage_host?
           @updater.update_host
         end
