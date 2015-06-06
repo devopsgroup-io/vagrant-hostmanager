@@ -134,6 +134,10 @@ elevated privileges. If hostmanager detects that it cannot overwrite the file,
 it will attempt to do so with elevated privileges, causing the
 [UAC](http://en.wikipedia.org/wiki/User_Account_Control) prompt to appear.
 
+To avoid the UAC prompt, open ```%WINDIR%\System32\drivers\etc\``` in
+Explorer, right-click the hosts file, go to Properties > Security > Edit
+and give your user Modify permission.
+
 ### UAC limitations
 
 Due to limitations caused by UAC, cancelling out of the UAC prompt will not cause any
