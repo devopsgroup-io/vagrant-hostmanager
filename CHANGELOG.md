@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.6.0
+### Features
+* splits hostnames across many lines [[#67](https://github.com/smdahlen/vagrant-hostmanager/pull/103)]
+
+### Bug fixes
+* show description for hostmanager when vagrant list-commands is triggered [[#105](https://github.com/smdahlen/vagrant-hostmanager/pull/105)]
+
+### Miscelaneous
+* extract old vagrant version compatibility code into util method [[#97](https://github.com/smdahlen/vagrant-hostmanager/pull/97)]
+* migrate HostsFile code into its own class [[#98](https://github.com/smdahlen/vagrant-hostmanager/pull/97)]
+
+[Full diff](https://github.com/smdahlen/vagrant-hostmanager/compare/v1.5.0...v1.6.0)
+
+
 ## 1.5.0
 ### Features
 * hostmanager now runs *before* provisioning takes place, on `up` action [[#73](https://github.com/smdahlen/vagrant-hostmanager/issues/73)]
@@ -13,7 +27,7 @@
 ### Miscelaneous
 * add passwordless sudo instructions to README [[#95](https://github.com/smdahlen/vagrant-hostmanager/pull/95)]
 
-[Full diff](https://github.com/smdahlen/vagrant-hostmanager/compare/v1.4.0...v1.5.0)  
+[Full diff](https://github.com/smdahlen/vagrant-hostmanager/compare/v1.4.0...v1.5.0)
 
 
 ## 1.4.0
@@ -27,7 +41,7 @@
 * when multiple private_networks are configured, the first one is used [[#64](https://github.com/smdahlen/vagrant-hostmanager/pull/64)]
 * destroyed machines are now removed from hosts file [[#52](https://github.com/smdahlen/vagrant-hostmanager/pull/52)]
 
-[Full diff](https://github.com/smdahlen/vagrant-hostmanager/compare/v1.3.0...v1.4.0)  
+[Full diff](https://github.com/smdahlen/vagrant-hostmanager/compare/v1.3.0...v1.4.0)
 
 
 ## 1.3.0
