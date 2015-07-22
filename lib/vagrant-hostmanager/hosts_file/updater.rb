@@ -89,8 +89,19 @@ module VagrantPlugins
           ip = get_ip_address(machine, resolving_machine)
           host = machine.config.vm.hostname || machine.name
           aliases = machine.config.hostmanager.aliases
+
           if ip != nil
-            "#{ip}\t#{host}\n" + aliases.map{|a| "#{ip}\t#{a}"}.join("\n") + "\n"
+            # As per GH-60, we optionally render aliases on separate lines
+            current_machine_config = ((resolving_machine && resolving_machine.config) || @config)            
+            if current_machine_config.hostmanager.aliases_on_separate_lines
+              rendered_aliases = aliases.map { |a| "#{ip}\t#{a}" }.join("\n")
+              separator = "\n"
+            else
+              rendered_aliases = aliases.join(" ")
+              separator = "\t"
+            end
+
+            "#{ip}\t#{host}" + separator + rendered_aliases + "\n"
           end
         end
 

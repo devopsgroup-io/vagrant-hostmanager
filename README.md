@@ -63,6 +63,11 @@ up or have a private ip configured will be added to the hosts file.
 In addition, the `hostmanager.aliases` configuration attribute can be used
 to provide aliases for your host names.
 
+On some systems, long alias lines have been reported to cause issues
+(see [#60](https://github.com/smdahlen/vagrant-hostmanager/issues/60)).
+In such cases, you may render aliases on separate lines by setting
+```hostmanager.aliases_on_separate_lines = true```.
+
 Example configuration:
 
 ```ruby
