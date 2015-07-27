@@ -4,7 +4,7 @@ module VagrantPlugins
 
       # Show description when `vagrant list-commands` is triggered
       def self.synopsis
-        "manages the /etc/hosts file within a multi-machine environment"
+        "plugin: vagrant-hostmanager: manages the /etc/hosts file within a multi-machine environment"
       end
 
       def execute
