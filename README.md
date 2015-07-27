@@ -1,5 +1,8 @@
 Vagrant Host Manager
 ====================
+
+[![Gem](https://img.shields.io/gem/dt/vagrant-hostmanager.svg)](https://rubygems.org/gems/vagrant-hostmanager)
+
 `vagrant-hostmanager` is a Vagrant 1.1+ plugin that manages the `/etc/hosts`
 file on guest machines (and optionally the host). Its goal is to enable
 resolution of multi-machine environments deployed with a cloud provider
