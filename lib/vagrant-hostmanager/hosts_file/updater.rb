@@ -36,14 +36,13 @@ module VagrantPlugins
 
             # upload modified file and remove temporary file
             machine.communicate.upload(file, '/tmp/hosts')
-            machine.communicate.sudo("#{move_cmd} /tmp/hosts #{realhostfile}")
+            if windir
+              machine.communicate.sudo("#{move_cmd} /tmp/hosts/hosts.#{machine.name} #{realhostfile}")
+            else
+              machine.communicate.sudo("#{move_cmd} /tmp/hosts #{realhostfile}")
+            end
           end
 
-          # i have no idea if this is a windows competibility issue or not, but sometimes it dosen't work on my machine
-          begin
-            FileUtils.rm(file)
-          rescue Exception => e
-          end
         end
 
         def update_host
