@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.6.1
+### Bug fixes
+* Retain tmp hosts file and fix a bug where powershell mv does not move folder contents, in that context it's moving a file. [[#157](https://github.com/smdahlen/vagrant-hostmanager/issues/157)]
+
+[Full diff](https://github.com/smdahlen/vagrant-hostmanager/compare/v1.5.0...v1.6.0)
+
+
 ## 1.6.0
 ### Features
 * splits hostnames across many lines [[#67](https://github.com/smdahlen/vagrant-hostmanager/pull/103)]
