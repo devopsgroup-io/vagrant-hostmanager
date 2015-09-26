@@ -54,11 +54,10 @@ module VagrantPlugins
               include WindowsSupport unless include? WindowsSupport
             end
             crlf_file = @global_env.tmp_path.join('hosts.local.crlf')
-            windows_convert_to_crlf(file, crlf_file)
             hosts_location = "#{ENV['WINDIR']}\\System32\\drivers\\etc\\hosts"
             copy_proc = Proc.new { windows_copy_file(crlf_file, hosts_location) }
-            FileUtils.cp(hosts_location, crlf_file)
-            if update_file(crlf_file)
+            if update_file(file)
+              windows_convert_to_crlf(file, crlf_file)
               copy_proc.call
             end
           else
@@ -173,9 +172,10 @@ module VagrantPlugins
 
           require 'win32ole' if windows?
 
+          # Converts a file(source) to windows default EOL, needs Powershell v3
           def windows_convert_to_crlf(source, dest)
-            convert_cmd = "type \"#{source.to_s.gsub('/', '\\')}\" | more /P > \"#{dest.to_s.gsub('/', '\\')}\""
-            WIN32OLE.new('Shell.Application').ShellExecute('cmd', "/C #{convert_cmd}", nil, nil, 7)
+            convert_with_powershell = "Get-Content \"#{source.to_s.gsub(/\//, '\\')}\" | Set-Content \"#{dest.to_s.gsub(/\//, '\\')}\""
+            WIN32OLE.new('Shell.Application').ShellExecute('powershell', "-Command #{convert_with_powershell}", nil, nil, 7)
           end
 
           def windows_copy_file(source, dest)
