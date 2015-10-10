@@ -38,6 +38,8 @@ module VagrantPlugins
             machine.communicate.upload(file, '/tmp/hosts')
             if windir
               machine.communicate.sudo("#{move_cmd} /tmp/hosts/hosts.#{machine.name} #{realhostfile}")
+            elsif machine.communicate.test('test -f /.dockerinit')
+              machine.communicate.sudo("cat /tmp/hosts > #{realhostfile}")
             else
               machine.communicate.sudo("#{move_cmd} /tmp/hosts #{realhostfile}")
             end
