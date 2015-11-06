@@ -82,8 +82,8 @@ module VagrantPlugins
 
         def update_content(file_content, resolving_machine, include_id)
           id = include_id ? " id: #{read_or_create_id}" : ""
-          header = "## vagrant-hostmanager-start#{id}\n"
-          footer = "## vagrant-hostmanager-end\n"
+          header = "## vagrant-hostmanager-start-#{@provider}#{id}\n"
+          footer = "## vagrant-hostmanager-end-#{@provider}\n"
           body = get_machines
             .map { |machine| get_hosts_file_entry(machine, resolving_machine) }
             .join
