@@ -161,12 +161,33 @@ rake gem:build
 vagrant plugin install pkg/vagrant-hostmanager-*.gem
 ```
 
+
 Contribute
 ----------
-Contributions are welcome.
+To contribute, fork then clone the repository, and then the following:
 
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+**Developing**
+
+1. Install [Bundler](http://bundler.io/)
+2. Currently the Bundler version is locked to 1.6.9, please install this version.
+    * `sudo gem install bundler -v '1.6.9'`
+3. Then install vagrant-hostmanager dependancies:
+    * `bundle _1.6.9_ install`
+
+**Releasing**
+
+To release a new version of vagrant-hostmanager you will need to do the following:
+
+*(only contributors of the GitHub repo and owners of the project at RubyGems will have rights to do this)*
+
+1. First, bump the version in ~/lib/vagrant-hostmanager/version.rb:
+    * Follow [Semantic Versioning](http://semver.org/).
+2. Then, create a matching GitHub Release (this will also create a tag):
+    * Preface the version number with a `v`.
+    * https://github.com/smdahlen/vagrant-hostmanager/releases
+3. You will then need to build and push the new gem to RubyGems:
+    * `rake gem:build`
+    * `gem push pkg/vagrant-hostmanager-1.6.1.gem`
+4. Then, when John Doe runs the following, they will receive the updated vagrant-hostmanager plugin:
+    * `vagrant plugin update`
+    * `vagrant plugin update vagrant-hostmanager`
