@@ -148,19 +148,6 @@ and give your user Modify permission.
 Due to limitations caused by UAC, cancelling out of the UAC prompt will not cause any
 visible errors, however the ```hosts``` file will not be updated.
 
-Installing development version
-------------------------------
-
-If you want to install the bleeding version of vagrant-hostmanager (*at your own risk*), you can do the following
-(requires ruby and git):
-
-```
-git clone https://github.com/smdahlen/vagrant-hostmanager.git
-cd vagrant-hostmanager
-rake gem:build
-vagrant plugin install pkg/vagrant-hostmanager-*.gem
-```
-
 
 Contribute
 ----------
@@ -173,6 +160,17 @@ To contribute, fork then clone the repository, and then the following:
     * `sudo gem install bundler -v '1.6.9'`
 3. Then install vagrant-hostmanager dependancies:
     * `bundle _1.6.9_ install`
+
+**Testing**
+
+1. Build and package your newly developed code:
+    * `rake gem:build`
+2. Then install the packaged plugin:
+    * `vagrant plugin install pkg/vagrant-hostmanager-*.gem`
+3. Once you're done testing, roll-back to the latest released version:
+    * `vagrant plugin uninstall vagrant-hostmanager`
+    * `vagrant plugin install vagrant-hostmanager`
+4. Once you're satisfied developing and testing your new code, please submit a pull request for review.
 
 **Releasing**
 
