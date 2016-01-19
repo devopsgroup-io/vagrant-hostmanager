@@ -42,6 +42,9 @@ module VagrantPlugins
               machine.communicate.sudo("cat /tmp/hosts > #{realhostfile}")
             else
               machine.communicate.sudo("#{move_cmd} /tmp/hosts #{realhostfile}")
+              # fix permissions
+              machine.communicate.sudo("chown root:root #{realhostfile}")
+              machine.communicate.sudo("chmod 644 #{realhostfile}")
             end
           end
 
