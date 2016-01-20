@@ -15,10 +15,10 @@ module VagrantPlugins
         def update_guest(machine)
           return unless machine.communicate.ready?
 
-          if (machine.communicate.test("uname -s | grep SunOS"))
+          if machine.communicate.test("uname -s | grep SunOS")
             realhostfile = '/etc/inet/hosts'
             move_cmd = 'mv'
-          elsif (machine.communicate.test("test -d $Env:SystemRoot"))
+          elsif machine.communicate.test("test -d $Env:SystemRoot")
             windir = ""
             machine.communicate.execute("echo %SYSTEMROOT%", {:shell => :cmd}) do |type, contents|
               windir << contents.gsub("\r\n", '') if type == :stdout
@@ -50,23 +50,25 @@ module VagrantPlugins
         def update_host
           # copy and modify hosts file on host with Vagrant-managed entries
           file = @global_env.tmp_path.join('hosts.local')
-
           if WindowsSupport.windows?
             # lazily include windows Module
             class << self
               include WindowsSupport unless include? WindowsSupport
             end
-
+            crlf_file = @global_env.tmp_path.join('hosts.local.crlf')
             hosts_location = "#{ENV['WINDIR']}\\System32\\drivers\\etc\\hosts"
-            copy_proc = Proc.new { windows_copy_file(file, hosts_location) }
+            copy_proc = Proc.new { windows_copy_file(crlf_file, hosts_location) }
+            if update_file(file)
+              windows_convert_to_crlf(file, crlf_file)
+              copy_proc.call
+            end
           else
             hosts_location = '/etc/hosts'
             copy_proc = Proc.new { `sudo cp #{file} #{hosts_location}` }
-          end
-
-          FileUtils.cp(hosts_location, file)
-          if update_file(file)
-            copy_proc.call
+            FileUtils.cp(hosts_location, file)
+            if update_file(file)
+              copy_proc.call
+            end
           end
         end
 
@@ -152,7 +154,7 @@ module VagrantPlugins
 
         def read_or_create_id
           file = Pathname.new("#{@global_env.local_data_path}/hostmanager/id")
-          if (file.file?)
+          if file.file?
             id = file.read.strip
           else
             id = SecureRandom.uuid
@@ -171,6 +173,12 @@ module VagrantPlugins
           end
 
           require 'win32ole' if windows?
+
+          # Converts a file(source) to windows default EOL, needs Powershell v3
+          def windows_convert_to_crlf(source, dest)
+            convert_with_powershell = "Get-Content \"#{source.to_s.gsub(/\//, '\\')}\" | Set-Content \"#{dest.to_s.gsub(/\//, '\\')}\""
+            WIN32OLE.new('Shell.Application').ShellExecute('powershell', "-Command #{convert_with_powershell}", nil, nil, 7)
+          end
 
           def windows_copy_file(source, dest)
             begin
