@@ -17,17 +17,14 @@ module VagrantPlugins
 
           if (machine.communicate.test("uname -s | grep SunOS"))
             realhostfile = '/etc/inet/hosts'
-            move_cmd = 'mv'
           elsif (machine.communicate.test("test -d $Env:SystemRoot"))
             windir = ""
             machine.communicate.execute("echo %SYSTEMROOT%", {:shell => :cmd}) do |type, contents|
               windir << contents.gsub("\r\n", '') if type == :stdout
             end
             realhostfile = "#{windir}\\System32\\drivers\\etc\\hosts"
-            move_cmd = 'mv -force'
           else
             realhostfile = '/etc/hosts'
-            move_cmd = 'mv -f'
           end
           # download and modify file with Vagrant-managed entries
           file = @global_env.tmp_path.join("hosts.#{machine.name}")
@@ -37,11 +34,9 @@ module VagrantPlugins
             # upload modified file and remove temporary file
             machine.communicate.upload(file, '/tmp/hosts')
             if windir
-              machine.communicate.sudo("#{move_cmd} /tmp/hosts/hosts.#{machine.name} #{realhostfile}")
-            elsif machine.communicate.test('test -f /.dockerinit')
-              machine.communicate.sudo("cat /tmp/hosts > #{realhostfile}")
+              machine.communicate.sudo("mv -force /tmp/hosts/hosts.#{machine.name} #{realhostfile}")
             else
-              machine.communicate.sudo("#{move_cmd} /tmp/hosts #{realhostfile}")
+              machine.communicate.sudo("cat /tmp/hosts > #{realhostfile}")
             end
           end
 
