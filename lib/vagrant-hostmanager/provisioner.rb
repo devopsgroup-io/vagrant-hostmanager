@@ -12,7 +12,9 @@ module VagrantPlugins
       end
 
       def provision
-        @updater.update_guest(@machine)
+        if @config.hostmanager.manage_guest?
+          @updater.update_guest(@machine)
+        end
         if @config.hostmanager.manage_host?
           @updater.update_host
         end

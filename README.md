@@ -46,6 +46,9 @@ Vagrantfile to activate this behavior.
 To update the host's `/etc/hosts` file, set the `hostmanager.manage_host`
 attribute to `true`.
 
+To update the guests' `/etc/hosts` file, set the `hostmanager.manage_guest`
+attribute to `true`.
+
 A machine's IP address is defined by either the static IP for a private
 network configuration or by the SSH host configuration. To disable
 using the private network IP address, set `config.hostmanager.ignore_private_ip`
@@ -66,6 +69,7 @@ Example configuration:
 Vagrant.configure("2") do |config|
   config.hostmanager.enabled = true
   config.hostmanager.manage_host = true
+  config.hostmanager.manage_guest = true
   config.hostmanager.ignore_private_ip = false
   config.hostmanager.include_offline = true
   config.vm.define 'example-box' do |node|

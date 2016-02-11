@@ -27,11 +27,13 @@ module VagrantPlugins
           @app.call(env)
 
           # update /etc/hosts file on active machines
-          env[:ui].info I18n.t('vagrant_hostmanager.action.update_guests')
-          @global_env.active_machines.each do |name, p|
-            if p == @provider
-              machine = @global_env.machine(name, p)
-              @updater.update_guest(machine)
+          if @machine.config.hostmanager.manage_guest?
+            env[:ui].info I18n.t('vagrant_hostmanager.action.update_guests')
+            @global_env.active_machines.each do |name, p|
+              if p == @provider
+                machine = @global_env.machine(name, p)
+                @updater.update_guest(machine)
+              end
             end
           end
 
