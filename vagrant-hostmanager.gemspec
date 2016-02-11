@@ -7,8 +7,8 @@ require 'vagrant-hostmanager/version'
 Gem::Specification.new do |gem|
   gem.name          = 'vagrant-hostmanager'
   gem.version       = VagrantPlugins::HostManager::VERSION
-  gem.authors       = ['Shawn Dahlen']
-  gem.email         = ['shawn@dahlen.me']
+  gem.authors       = ['Shawn Dahlen','Seth Reeser']
+  gem.email         = ['shawn@dahlen.me','info@devopsgroup.io']
   gem.description   = %q{A Vagrant plugin that manages the /etc/hosts file within a multi-machine environment}
   gem.summary       = gem.description
   gem.license       = 'MIT'
