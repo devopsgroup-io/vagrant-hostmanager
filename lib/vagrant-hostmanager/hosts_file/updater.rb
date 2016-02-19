@@ -10,6 +10,7 @@ module VagrantPlugins
           @global_env = global_env
           @config = Util.get_config(@global_env)
           @provider = provider
+          @current_machine_config = nil
         end
 
         def update_guest(machine)
@@ -29,6 +30,7 @@ module VagrantPlugins
           # download and modify file with Vagrant-managed entries
           file = @global_env.tmp_path.join("hosts.#{machine.name}")
           machine.communicate.download(realhostfile, file)
+          @current_machine_config = ((machine && machine.config) || @config)
           if update_file(file, machine, false)
 
             # upload modified file and remove temporary file
@@ -87,28 +89,13 @@ module VagrantPlugins
 
         def get_hosts_file_entry(machine, resolving_machine)
           ip = get_ip_address(machine, resolving_machine)
-          host = machine.config.vm.hostname || machine.name
-          aliases = machine.config.hostmanager.aliases
-          all_names = [host] + aliases
 
-          if ip != nil
-            # As per GH-60, we optionally render aliases on separate lines
-            current_machine_config = ((resolving_machine && resolving_machine.config) || @config)
-
-            # Optionally prepend current fqdn as well. Useful when hostname set outside
-            # vagrant (eg. aws)
-            if current_machine_config.hostmanager.add_current_fqdn
-              fqdn = get_fqdn(resolving_machine)
-              unless fqdn.nil?
-                # put fqdn in front, removing it from the rest of the line if present
-                all_names = [fqdn] + all_names.select { |a| a != fqdn }
-              end
-            end
-
-            if current_machine_config.hostmanager.aliases_on_separate_lines
-              all_names.map { |a| "#{ip}\t#{a}" }.join("\n") + "\n"
+          unless ip.nil?
+            names = get_names(machine)
+            if @current_machine_config.hostmanager.aliases_on_separate_lines
+              names.map { |a| "#{ip}\t#{a}" }.join("\n") + "\n"
             else
-              "#{ip}\t" + all_names.join(" ") + "\n"
+              "#{ip}\t" + names.join(" ") + "\n"
             end
           end
         end
@@ -128,6 +115,24 @@ module VagrantPlugins
             end
             ip || (machine.ssh_info ? machine.ssh_info[:host] : nil)
           end
+        end
+
+        # get all names, in the right order (fqdn first if relevant)
+        def get_names(machine)
+          host = machine.config.vm.hostname || machine.name
+          aliases = machine.config.hostmanager.aliases
+          all_names = [host] + aliases
+
+          # Optionally prepend current fqdn as well. Useful with hostname set outside
+          # vagrant (eg. aws)
+          if @current_machine_config.hostmanager.add_current_fqdn
+            fqdn = get_fqdn(machine)
+            unless fqdn.nil?
+              # put fqdn in front, removing it from the rest of the line if present
+              all_names = [fqdn] + all_names.select { |a| a != fqdn }
+            end
+          end
+          all_names
         end
 
         def get_fqdn(machine)
