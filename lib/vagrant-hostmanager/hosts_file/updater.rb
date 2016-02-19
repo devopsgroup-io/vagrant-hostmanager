@@ -91,7 +91,7 @@ module VagrantPlugins
           ip = get_ip_address(machine, resolving_machine)
 
           unless ip.nil?
-            names = get_names(machine)
+            names = get_names(machine, resolving_machine)
             if @current_machine_config.hostmanager.aliases_on_separate_lines
               names.map { |a| "#{ip}\t#{a}" }.join("\n") + "\n"
             else
@@ -117,8 +117,8 @@ module VagrantPlugins
           end
         end
 
-        # get all names, in the right order (fqdn first if relevant)
-        def get_names(machine)
+        # get all names including aliases, in the right order (fqdn first if relevant)
+        def get_names(machine, resolving_machine)
           host = machine.config.vm.hostname || machine.name
           aliases = machine.config.hostmanager.aliases
           all_names = [host] + aliases
@@ -126,23 +126,26 @@ module VagrantPlugins
           # Optionally prepend current fqdn as well. Useful with hostname set outside
           # vagrant (eg. aws)
           if @current_machine_config.hostmanager.add_current_fqdn
-            fqdn = get_fqdn(machine)
-            unless fqdn.nil?
-              # put fqdn in front, removing it from the rest of the line if present
-              all_names = [fqdn] + all_names.select { |a| a != fqdn }
-            end
+            dns = get_dns(machine)
+            # put fqdn in front
+            all_names = dns + all_names
           end
-          all_names
+
+          all_names.uniq # order is kept b uniq
         end
 
-        def get_fqdn(machine)
-          fqdn = nil
+        # return fqdn *and* short name
+        def get_dns(machine)
+          names = []
           unless machine.nil?
             machine.communicate.execute('/bin/hostname -f') do |type, hostname|
-              fqdn = hostname.strip
+              names += [hostname.strip]
+            end
+            machine.communicate.execute('/bin/hostname') do |type, hostname|
+              names += [hostname.strip]
             end
           end
-          fqdn
+          names
         end
 
         def get_machines
@@ -176,7 +179,40 @@ module VagrantPlugins
           footer_pattern = Regexp.quote(footer)
           pattern = Regexp.new("\n*#{header_pattern}.*?#{footer_pattern}\n*", Regexp::MULTILINE)
           # Replace existing block or append
-          old_content.match(pattern) ? old_content.sub(pattern, block) : old_content.rstrip + block
+          newcontent = old_content.match(pattern) ? old_content.sub(pattern, block) : old_content.rstrip + block
+
+          ### remove name duplication in 127.*
+          cleancontent = ''
+
+          all_names = []
+          # First, extract back names from the body. If a name appear there, it
+          # should not be anywhere else.
+          body.each_line do |line|
+            tokens = line.sub(/#.*$/, '').strip.split(/\s+/)
+            ip = tokens.shift
+            unless tokens.empty?
+              all_names += tokens
+            end
+          end
+          puts(all_names)
+
+          # Then remove those names from any 127.* lines
+          newcontent.each_line do |line|
+            if line =~ /^\s*127\./
+              # Here be dragons.
+              tokens = line.sub(/#.*$/, '').strip.split(/\s+/)
+              ip=tokens.shift
+              dedup = tokens - all_names
+              unless dedup.empty?
+                cleancontent += "#{ip}\t" + dedup.join(' ') + "\n"
+              end
+            else
+              cleancontent += line
+            end
+          end
+
+          cleancontent
+
         end
 
         def read_or_create_id
