@@ -194,7 +194,6 @@ module VagrantPlugins
               all_names += tokens
             end
           end
-          puts(all_names)
 
           # Then remove those names from any 127.* lines
           newcontent.each_line do |line|
