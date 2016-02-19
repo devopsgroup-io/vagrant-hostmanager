@@ -89,19 +89,27 @@ module VagrantPlugins
           ip = get_ip_address(machine, resolving_machine)
           host = machine.config.vm.hostname || machine.name
           aliases = machine.config.hostmanager.aliases
+          all_names = [host] + aliases
 
           if ip != nil
             # As per GH-60, we optionally render aliases on separate lines
-            current_machine_config = ((resolving_machine && resolving_machine.config) || @config)            
-            if current_machine_config.hostmanager.aliases_on_separate_lines
-              rendered_aliases = aliases.map { |a| "#{ip}\t#{a}" }.join("\n")
-              separator = "\n"
-            else
-              rendered_aliases = aliases.join(" ")
-              separator = "\t"
+            current_machine_config = ((resolving_machine && resolving_machine.config) || @config)
+
+            # Optionally prepend current fqdn as well. Useful when hostname set outside
+            # vagrant (eg. aws)
+            if current_machine_config.hostmanager.add_current_fqdn
+              fqdn = get_fqdn(resolving_machine)
+              unless fqdn.nil?
+                # put fqdn in front, removing it from the rest of the line if present
+                all_names = [fqdn] + all_names.select { |a| a != fqdn }
+              end
             end
 
-            "#{ip}\t#{host}" + separator + rendered_aliases + "\n"
+            if current_machine_config.hostmanager.aliases_on_separate_lines
+              all_names.map { |a| "#{ip}\t#{a}" }.join("\n") + "\n"
+            else
+              "#{ip}\t" + all_names.join(" ") + "\n"
+            end
           end
         end
 
@@ -120,6 +128,16 @@ module VagrantPlugins
             end
             ip || (machine.ssh_info ? machine.ssh_info[:host] : nil)
           end
+        end
+
+        def get_fqdn(machine)
+          fqdn = nil
+          unless machine.nil?
+            machine.communicate.execute('/bin/hostname -f') do |type, hostname|
+              fqdn = hostname.strip
+            end
+          end
+          fqdn
         end
 
         def get_machines

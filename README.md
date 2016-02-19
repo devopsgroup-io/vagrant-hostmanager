@@ -17,10 +17,10 @@ for some providers. Version 1.2 reverts this feature until a suitable implementa
 supporting all providers is available.
 
 ***Potentially breaking change in v1.5.0:*** the running order on `vagrant up` has changed
-so that hostmanager runs before provisioning takes place.  This ensures all hostnames are 
-available to the guest when it is being provisioned 
+so that hostmanager runs before provisioning takes place.  This ensures all hostnames are
+available to the guest when it is being provisioned
 (see [#73](https://github.com/smdahlen/vagrant-hostmanager/issues/73)).
-Previously, hostmanager would run as the very last action.  If you depend on the old behavior, 
+Previously, hostmanager would run as the very last action.  If you depend on the old behavior,
 see the [provisioner](#provisioner) section.
 
 Installation
@@ -68,6 +68,12 @@ On some systems, long alias lines have been reported to cause issues
 In such cases, you may render aliases on separate lines by setting
 ```hostmanager.aliases_on_separate_lines = true```.
 
+If you have all your aliases on one line and you do not manage the fqdn fully
+from vagrant (AWS for instance) you might want to add the fqdn as
+well on this line to have only one canonical line. In such case, set
+```hostmanager.add_current_fqdn = true```.
+
+
 Example configuration:
 
 ```ruby
@@ -87,9 +93,9 @@ end
 
 ### Provisioner
 
-Starting at version 1.5.0, `vagrant up` runs hostmanager before any provisioning occurs. 
-If you would like hostmanager to run after or during your provisioning stage, 
-you can use hostmanager as a provisioner.  This allows you to use the provisioning 
+Starting at version 1.5.0, `vagrant up` runs hostmanager before any provisioning occurs.
+If you would like hostmanager to run after or during your provisioning stage,
+you can use hostmanager as a provisioner.  This allows you to use the provisioning
 order to ensure that hostmanager runs when desired. The provisioner will collect
 hosts from boxes with the same provider as the running box.
 
