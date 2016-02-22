@@ -10,6 +10,7 @@ Gem::Specification.new do |gem|
   gem.authors       = ['Shawn Dahlen','Seth Reeser','Guillaume']
   gem.email         = ['shawn@dahlen.me','info@devopsgroup.io','guillaume@lomig.net']
   gem.description   = %q{A Vagrant plugin that manages the /etc/hosts file within a multi-machine environment}
+  gem.homepage      = 'https://github.com/lomignet/vagrant-hostoverseer'
   gem.summary       = gem.description
   gem.license       = 'MIT'
 
