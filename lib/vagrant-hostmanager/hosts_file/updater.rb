@@ -10,6 +10,7 @@ module VagrantPlugins
           @global_env = global_env
           @config = Util.get_config(@global_env)
           @provider = provider
+          @current_machine_config = nil
         end
 
         def update_guest(machine)
@@ -29,6 +30,7 @@ module VagrantPlugins
           # download and modify file with Vagrant-managed entries
           file = @global_env.tmp_path.join("hosts.#{machine.name}")
           machine.communicate.download(realhostfile, file)
+          @current_machine_config = ((machine && machine.config) || @config)
           if update_file(file, machine, false)
 
             # upload modified file and remove temporary file
@@ -77,8 +79,8 @@ module VagrantPlugins
 
         def update_content(file_content, resolving_machine, include_id)
           id = include_id ? " id: #{read_or_create_id}" : ""
-          header = "## vagrant-hostmanager-start#{id}\n"
-          footer = "## vagrant-hostmanager-end\n"
+          header = "## vagrant-hostmanager-start-#{@provider}#{id}\n"
+          footer = "## vagrant-hostmanager-end-#{@provider}\n"
           body = get_machines
             .map { |machine| get_hosts_file_entry(machine, resolving_machine) }
             .join
@@ -87,10 +89,14 @@ module VagrantPlugins
 
         def get_hosts_file_entry(machine, resolving_machine)
           ip = get_ip_address(machine, resolving_machine)
-          host = machine.config.vm.hostname || machine.name
-          aliases = machine.config.hostmanager.aliases
-          if ip != nil
-            "#{ip}\t#{host}\n" + aliases.map{|a| "#{ip}\t#{a}"}.join("\n") + "\n"
+
+          unless ip.nil?
+            names = get_names(machine, resolving_machine)
+            if @current_machine_config.hostmanager.aliases_on_separate_lines
+              names.map { |a| "#{ip}\t#{a}" }.join("\n") + "\n"
+            else
+              "#{ip}\t" + names.join(" ") + "\n"
+            end
           end
         end
 
@@ -109,6 +115,37 @@ module VagrantPlugins
             end
             ip || (machine.ssh_info ? machine.ssh_info[:host] : nil)
           end
+        end
+
+        # get all names including aliases, in the right order (fqdn first if relevant)
+        def get_names(machine, resolving_machine)
+          host = machine.config.vm.hostname || machine.name
+          aliases = machine.config.hostmanager.aliases
+          all_names = [host] + aliases
+
+          # Optionally prepend current fqdn as well. Useful with hostname set outside
+          # vagrant (eg. aws)
+          if @current_machine_config.hostmanager.add_current_fqdn
+            dns = get_dns(machine)
+            # put fqdn in front
+            all_names = dns + all_names
+          end
+
+          all_names.uniq # order is kept b uniq
+        end
+
+        # return fqdn *and* short name
+        def get_dns(machine)
+          names = []
+          unless machine.nil?
+            machine.communicate.execute('/bin/hostname -f') do |type, hostname|
+              names += [hostname.strip]
+            end
+            machine.communicate.execute('/bin/hostname') do |type, hostname|
+              names += [hostname.strip]
+            end
+          end
+          names
         end
 
         def get_machines
@@ -142,7 +179,39 @@ module VagrantPlugins
           footer_pattern = Regexp.quote(footer)
           pattern = Regexp.new("\n*#{header_pattern}.*?#{footer_pattern}\n*", Regexp::MULTILINE)
           # Replace existing block or append
-          old_content.match(pattern) ? old_content.sub(pattern, block) : old_content.rstrip + block
+          newcontent = old_content.match(pattern) ? old_content.sub(pattern, block) : old_content.rstrip + block
+
+          ### remove name duplication in 127.*
+          cleancontent = ''
+
+          all_names = []
+          # First, extract back names from the body. If a name appear there, it
+          # should not be anywhere else.
+          body.each_line do |line|
+            tokens = line.sub(/#.*$/, '').strip.split(/\s+/)
+            ip = tokens.shift
+            unless tokens.empty?
+              all_names += tokens
+            end
+          end
+
+          # Then remove those names from any 127.* lines
+          newcontent.each_line do |line|
+            if line =~ /^\s*127\./
+              # Here be dragons.
+              tokens = line.sub(/#.*$/, '').strip.split(/\s+/)
+              ip=tokens.shift
+              dedup = tokens - all_names
+              unless dedup.empty?
+                cleancontent += "#{ip}\t" + dedup.join(' ') + "\n"
+              end
+            else
+              cleancontent += line
+            end
+          end
+
+          cleancontent
+
         end
 
         def read_or_create_id

@@ -8,6 +8,8 @@ module VagrantPlugins
       attr_accessor :aliases
       attr_accessor :include_offline
       attr_accessor :ip_resolver
+      attr_accessor :aliases_on_separate_lines
+      attr_accessor :add_current_fqdn
 
       alias_method :enabled?, :enabled
       alias_method :include_offline?, :include_offline
@@ -22,6 +24,8 @@ module VagrantPlugins
         @include_offline    = UNSET_VALUE
         @aliases            = UNSET_VALUE
         @ip_resolver        = UNSET_VALUE
+        @aliases_on_separate_lines   = UNSET_VALUE
+        @add_current_fqdn   = UNSET_VALUE
       end
 
       def finalize!
@@ -32,7 +36,8 @@ module VagrantPlugins
         @include_offline    = false if @include_offline == UNSET_VALUE
         @aliases            = [] if @aliases == UNSET_VALUE
         @ip_resolver        = nil if @ip_resolver == UNSET_VALUE
-
+        @aliases_on_separate_lines   = false if @aliases_on_separate_lines == UNSET_VALUE
+        @add_current_fqdn   = false if @add_current_fqdn == UNSET_VALUE
         @aliases = [ @aliases ].flatten
       end
 
