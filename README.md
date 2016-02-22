@@ -6,6 +6,27 @@ Vagrant Host Manager
 [![Gem](https://img.shields.io/gem/dtv/vagrant-hostmanager.svg)](https://rubygems.org/gems/vagrant-hostmanager)
 [![Twitter](https://img.shields.io/twitter/url/https/github.com/smdahlen/vagrant-hostmanager.svg?style=social)](https://twitter.com/intent/tweet?text=Check%20out%20this%20awesome%20Vagrant%20plugin%21&url=https%3A%2F%2Fgithub.com%2Fsmdahlen%2Fvagrant-hostmanager&hashtags=vagrant%hostmanager&original_referer=)
 
+`vagrant-hostoverseer` is a fork of `vagrant-hostmanager` adding a few extras:
+- Manage hostnames of multiple providers,
+- Add the option to manages aliases on one line only,
+- Add the option of automagically add the fqdn to the alias line.
+
+The reasons of these patches are:
+- In the upstream hostmanager, if you spawn a machine with one provider, the addresses
+in all other providers are lost.
+- The format of `/etc/hosts` according the man page is that one IP must appear on one line only.
+- As there are a few ways to set up fqdn on a server and different tools will
+use different ways to get the fqdn, only adding aliases in `/etc/hosts` created some issues,
+for instance on AWS.
+
+I would like to have these patches merged upstream but first I am not sure upstream
+considers these contributions worthwhile and second I know that there is at least an
+annoying limitation where the fqdn option will work properly only for linux hosts.
+
+Beyond the command to install the plugin, all references and configurations are
+still named hostmanager as my goal is not keep this fork, but have it eventually
+properly merged.
+
 `vagrant-hostmanager` is a Vagrant 1.1+ plugin that manages the `/etc/hosts`
 file on guest machines (and optionally the host). Its goal is to enable
 resolution of multi-machine environments deployed with a cloud provider
@@ -27,7 +48,7 @@ Installation
 ------------
 Install the plugin following the typical Vagrant 1.1 procedure:
 
-    $ vagrant plugin install vagrant-hostmanager
+    $ vagrant plugin install vagrant-oversser
 
 Usage
 -----

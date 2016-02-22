@@ -5,10 +5,10 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'vagrant-hostmanager/version'
 
 Gem::Specification.new do |gem|
-  gem.name          = 'vagrant-hostmanager'
+  gem.name          = 'vagrant-hostoverseer'
   gem.version       = VagrantPlugins::HostManager::VERSION
-  gem.authors       = ['Shawn Dahlen','Seth Reeser']
-  gem.email         = ['shawn@dahlen.me','info@devopsgroup.io']
+  gem.authors       = ['Shawn Dahlen','Seth Reeser','Guillaume']
+  gem.email         = ['shawn@dahlen.me','info@devopsgroup.io','guillaume@lomig.net']
   gem.description   = %q{A Vagrant plugin that manages the /etc/hosts file within a multi-machine environment}
   gem.summary       = gem.description
   gem.license       = 'MIT'
