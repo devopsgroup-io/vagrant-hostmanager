@@ -4,24 +4,9 @@ Vagrant Host Manager
 [![Gem](https://img.shields.io/gem/v/vagrant-hostmanager.svg)](https://rubygems.org/gems/vagrant-hostmanager)
 [![Gem](https://img.shields.io/gem/dt/vagrant-hostmanager.svg)](https://rubygems.org/gems/vagrant-hostmanager)
 [![Gem](https://img.shields.io/gem/dtv/vagrant-hostmanager.svg)](https://rubygems.org/gems/vagrant-hostmanager)
-[![Twitter](https://img.shields.io/twitter/url/https/github.com/smdahlen/vagrant-hostmanager.svg?style=social)](https://twitter.com/intent/tweet?text=Check%20out%20this%20awesome%20Vagrant%20plugin%21&url=https%3A%2F%2Fgithub.com%2Fsmdahlen%2Fvagrant-hostmanager&hashtags=vagrant%hostmanager&original_referer=)
+[![Twitter](https://img.shields.io/twitter/url/https/github.com/devopsgroup-io/vagrant-hostmanager.svg?style=social)](https://twitter.com/intent/tweet?text=Check%20out%20this%20awesome%20Vagrant%20plugin%21&url=https%3A%2F%2Fgithub.com%devopsgroup-io%2Fvagrant-hostmanager&hashtags=vagrant%hostmanager&original_referer=)
 
-`vagrant-hostmanager` is a Vagrant 1.1+ plugin that manages the `/etc/hosts`
-file on guest machines (and optionally the host). Its goal is to enable
-resolution of multi-machine environments deployed with a cloud provider
-where IP addresses are not known in advance.
-
-*NOTE:* Version 1.1 of the plugin prematurely introduced a feature to hook into
-commands other than `vagrant up` and `vagrant destroy`. Version 1.1 broke support
-for some providers. Version 1.2 reverts this feature until a suitable implementation
-supporting all providers is available.
-
-***Potentially breaking change in v1.5.0:*** the running order on `vagrant up` has changed
-so that hostmanager runs before provisioning takes place.  This ensures all hostnames are 
-available to the guest when it is being provisioned 
-(see [#73](https://github.com/smdahlen/vagrant-hostmanager/issues/73)).
-Previously, hostmanager would run as the very last action.  If you depend on the old behavior, 
-see the [provisioner](#provisioner) section.
+`vagrant-hostmanager` is a plugin that manages the `/etc/hosts` file on guest machines (and optionally the host). Its goal is to enable resolution of multi-machine environments deployed with a cloud provider where IP addresses are not known in advance.
 
 Installation
 ------------
@@ -172,6 +157,31 @@ Due to limitations caused by UAC, cancelling out of the UAC prompt will not caus
 visible errors, however the ```hosts``` file will not be updated.
 
 
+Compatability
+-------------
+This Vagrant plugin has been tested with the following technology.
+
+Date Tested | Vagrant Version | vagrant-hostmanager Version | Host (Workstation) Operating System | Guest (DigitalOcean) Operating System
+------------|-----------------|-----------------------------|-------------------------------------|--------------------------------------
+03/23/2016  | 1.8.1           | 1.8.1                       | Ubuntu 14.04 LTS                    | CentOS 7.2
+03/22/2016  | 1.8.1           | 1.8.1                       | OS X 10.11.4                        | CentOS 7.2
+
+
+Troubleshooting
+-------------
+* Version 1.1 of the plugin prematurely introduced a feature to hook into
+commands other than `vagrant up` and `vagrant destroy`. Version 1.1 broke support
+for some providers. Version 1.2 reverts this feature until a suitable implementation
+supporting all providers is available.
+
+* Potentially breaking change in v1.5.0: the running order on `vagrant up` has changed
+so that hostmanager runs before provisioning takes place.  This ensures all hostnames are 
+available to the guest when it is being provisioned 
+(see [#73](https://github.com/devopsgroup-io/vagrant-hostmanager/issues/73)).
+Previously, hostmanager would run as the very last action.  If you depend on the old behavior, 
+see the [provisioner](#provisioner) section.
+
+
 Contribute
 ----------
 To contribute, fork then clone the repository, and then the following:
@@ -205,7 +215,7 @@ To release a new version of vagrant-hostmanager you will need to do the followin
     * Follow [Semantic Versioning](http://semver.org/).
 2. Then, create a matching GitHub Release (this will also create a tag):
     * Preface the version number with a `v`.
-    * https://github.com/smdahlen/vagrant-hostmanager/releases
+    * https://github.com/devopsgroup-io/vagrant-hostmanager/releases
 3. You will then need to build and push the new gem to RubyGems:
     * `rake gem:build`
     * `gem push pkg/vagrant-hostmanager-1.6.1.gem`
