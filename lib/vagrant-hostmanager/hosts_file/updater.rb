@@ -56,7 +56,12 @@ module VagrantPlugins
             copy_proc = Proc.new { windows_copy_file(file, hosts_location) }
           else
             hosts_location = '/etc/hosts'
-            copy_proc = Proc.new { `sudo cp #{file} #{hosts_location}` }
+            copy_proc = Proc.new { 
+              tmp = Tempfile.new('hosts.local')
+              FileUtils.cp(file, tmp.path())
+              `sudo cp #{tmp.path()} #{hosts_location}`
+              tmp.close!
+            }
           end
 
           FileUtils.cp(hosts_location, file)
