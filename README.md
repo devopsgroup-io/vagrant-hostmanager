@@ -157,7 +157,7 @@ Due to limitations caused by UAC, cancelling out of the UAC prompt will not caus
 visible errors, however the ```hosts``` file will not be updated.
 
 
-Compatability
+Compatibility
 -------------
 This Vagrant plugin has been tested with the following technology.
 
