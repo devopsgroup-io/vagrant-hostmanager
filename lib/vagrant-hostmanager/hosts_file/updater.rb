@@ -56,7 +56,7 @@ module VagrantPlugins
             copy_proc = Proc.new { windows_copy_file(file, hosts_location) }
           else
             hosts_location = '/etc/hosts'
-            copy_proc = Proc.new { `sudo cp #{file} #{hosts_location}` }
+            copy_proc = Proc.new { `[ -w #{hosts_location} ] && cat #{file} > #{hosts_location} || sudo cp #{file} #{hosts_location}` }
           end
 
           FileUtils.cp(hosts_location, file)
