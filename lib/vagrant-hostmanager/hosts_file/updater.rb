@@ -10,6 +10,8 @@ module VagrantPlugins
           @global_env = global_env
           @config = Util.get_config(@global_env)
           @provider = provider
+          @logger = Log4r::Logger.new('vagrant::hostmanager::updater')
+          @logger.debug("init updater")
         end
 
         def update_guest(machine)
@@ -29,10 +31,14 @@ module VagrantPlugins
           # download and modify file with Vagrant-managed entries
           file = @global_env.tmp_path.join("hosts.#{machine.name}")
           machine.communicate.download(realhostfile, file)
+
+          @logger.debug("file is: #{file.to_s}")
+          @logger.debug("class of file is: #{file.class}")
+
           if update_file(file, machine, false)
 
             # upload modified file and remove temporary file
-            machine.communicate.upload(file, '/tmp/hosts')
+            machine.communicate.upload(file.to_s, '/tmp/hosts')
             if windir
               machine.communicate.sudo("mv -force /tmp/hosts/hosts.#{machine.name} #{realhostfile}")
             else
