@@ -161,7 +161,7 @@ Compatibility
 -------------
 This Vagrant plugin has been tested with the following technology.
 
-Date Tested | Vagrant Version | vagrant-hostmanager Version | Host (Workstation) Operating System | Guest (DigitalOcean) Operating System
+Date Tested | Vagrant Version | vagrant-hostmanager Version | Host (Workstation) Operating System | Guest (VirtualBox) Operating System
 ------------|-----------------|-----------------------------|-------------------------------------|--------------------------------------
 03/23/2016  | 1.8.1           | 1.8.1                       | Ubuntu 14.04 LTS                    | CentOS 7.2
 03/22/2016  | 1.8.1           | 1.8.1                       | OS X 10.11.4                        | CentOS 7.2
