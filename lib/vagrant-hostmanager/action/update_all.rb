@@ -32,7 +32,10 @@ module VagrantPlugins
             @global_env.active_machines.each do |name, p|
               if p == @provider
                 machine = @global_env.machine(name, p)
-                @updater.update_guest(machine)
+                state = machine.state
+                if state.short_description.eql? 'running'
+                  @updater.update_guest(machine)
+                end
               end
             end
           end
