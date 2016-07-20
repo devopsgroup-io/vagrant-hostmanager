@@ -33,7 +33,7 @@ module VagrantPlugins
               if p == @provider
                 machine = @global_env.machine(name, p)
                 state = machine.state
-                if state.short_description.eql? 'active' || 'running'
+                if ['active','running'].include?(state.short_description)
                   @updater.update_guest(machine)
                 end
               end
