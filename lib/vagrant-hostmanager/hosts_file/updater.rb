@@ -62,7 +62,12 @@ module VagrantPlugins
             copy_proc = Proc.new { windows_copy_file(file, hosts_location) }
           else
             hosts_location = '/etc/hosts'
-            copy_proc = Proc.new { `[ -w #{hosts_location} ] && cat #{file} > #{hosts_location} || sudo cp #{file} #{hosts_location}` }
+            if !ENV['SUDO_ASKPASS'].nil?
+              sudo='sudo -A'
+            else
+              sudo='sudo'
+            end
+            copy_proc = Proc.new { `[ -w #{hosts_location} ] && cat #{file} > #{hosts_location} || #{sudo} cp #{file} #{hosts_location}` }
           end
 
           FileUtils.cp(hosts_location, file)
