@@ -148,7 +148,13 @@ module VagrantPlugins
           footer_pattern = Regexp.quote(footer)
           pattern = Regexp.new("\n*#{header_pattern}.*?#{footer_pattern}\n*", Regexp::MULTILINE)
           # Replace existing block or append
-          old_content.match(pattern) ? old_content.sub(pattern, block) : old_content.rstrip + block
+          content = old_content.match(pattern) ? old_content.sub(pattern, block) : old_content.rstrip + block
+
+          if WindowsSupport.windows?
+              content.encode(content.encoding, :universal_encoding => true).encode(content.encoding, :crlf_newline => true)
+          else
+              content.encode(content.encoding, :universal_encoding => true)
+          end
         end
 
         def read_or_create_id
