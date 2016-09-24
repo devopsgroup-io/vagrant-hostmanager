@@ -8,6 +8,9 @@ module VagrantPlugins
       attr_accessor :aliases
       attr_accessor :include_offline
       attr_accessor :ip_resolver
+      attr_accessor :fqdn_friendly
+      attr_accessor :domain_name
+      attr_accessor :extra_hosts
 
       alias_method :enabled?, :enabled
       alias_method :include_offline?, :include_offline
@@ -22,6 +25,9 @@ module VagrantPlugins
         @include_offline    = UNSET_VALUE
         @aliases            = UNSET_VALUE
         @ip_resolver        = UNSET_VALUE
+        @fqdn_friendly      = UNSET_VALUE
+        @domain_name        = UNSET_VALUE
+        @extra_hosts        = UNSET_VALUE
       end
 
       def finalize!
@@ -32,6 +38,9 @@ module VagrantPlugins
         @include_offline    = false if @include_offline == UNSET_VALUE
         @aliases            = [] if @aliases == UNSET_VALUE
         @ip_resolver        = nil if @ip_resolver == UNSET_VALUE
+        @fqdn_friendly      = false if @fqdn_friendly == UNSET_VALUE
+        @domain_name        = '' if @domain_name == UNSET_VALUE
+        @extra_hosts        = [] if @extra_hosts == UNSET_VALUE
 
         @aliases = [ @aliases ].flatten
       end
@@ -44,6 +53,7 @@ module VagrantPlugins
         errors << validate_bool('hostmanager.manage_guest', @manage_guest)
         errors << validate_bool('hostmanager.ignore_private_ip', @ignore_private_ip)
         errors << validate_bool('hostmanager.include_offline', @include_offline)
+        errors << validate_bool('hostmanager.fqdn_friendly', @fqdn_friendly)
         errors.compact!
 
         # check if aliases option is an Array
