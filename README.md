@@ -22,7 +22,8 @@ command:
     $ vagrant hostmanager
 
 The plugin hooks into the `vagrant up` and `vagrant destroy` commands
-automatically.
+automatically. If you want to update the hosts on the  `vagrant halt` command as well,
+set the `hostmanager.update_on_halt` attribute to `true`
 When a machine enters or exits the running state , all active
 machines with the same provider will have their `hosts` file updated
 accordingly. Set the `hostmanager.enabled` attribute to `true` in the
