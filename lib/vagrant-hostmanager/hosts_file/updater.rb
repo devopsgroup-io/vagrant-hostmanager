@@ -96,7 +96,14 @@ module VagrantPlugins
           host = machine.config.vm.hostname || machine.name
           aliases = machine.config.hostmanager.aliases
           if ip != nil
-            "#{ip}\t#{host}\n" + aliases.map{|a| "#{ip}\t#{a}"}.join("\n") + "\n"
+            if @config.hostmanager.fqdn_friendly and @config.hostmanager.domain_name != ''
+              new_aliases = aliases + ["#{host}"]	# append to a copy
+              # this format is needed for things like fqdn's to work properly
+              # test with: facter -p | grep fqdn
+              "#{ip}\t#{host}.#{@config.hostmanager.domain_name}\t" + new_aliases.join("\t") + "\n"
+            else
+              "#{ip}\t#{host}\n" + aliases.map{|a| "#{ip}\t#{a}"}.join("\n") + "\n"
+            end
           end
         end
 
@@ -138,17 +145,37 @@ module VagrantPlugins
         end
 
         def get_new_content(header, footer, body, old_content)
+
+          extras = ''
+          @config.hostmanager.extra_hosts.each do |x|
+            extras+= ("#{x[:ip]}\t#{x[:host]}\t" + x[:aliases].join("\t") + "\n")
+          end
+
           if body.empty?
-            block = "\n"
+            block = "\n" + extras
           else
-            block = "\n\n" + header + body + footer + "\n"
+            block = "\n\n" + header + body + extras + footer + "\n"
           end
           # Pattern for finding existing block
           header_pattern = Regexp.quote(header)
           footer_pattern = Regexp.quote(footer)
           pattern = Regexp.new("\n*#{header_pattern}.*?#{footer_pattern}\n*", Regexp::MULTILINE)
           # Replace existing block or append
-          old_content.match(pattern) ? old_content.sub(pattern, block) : old_content.rstrip + block
+          output = old_content.match(pattern) ? old_content.sub(pattern, block) : old_content.rstrip + block
+
+          # remove the hostname from the 127.0.0.1 line... this breaks the fqdn
+          if @config.hostmanager.fqdn_friendly
+            output = output.split("\n")	# transform into array
+            output.each_with_index do |x, i|
+              # look for a line that has 127.0.0.1   <hostname> [...]
+              if x.start_with?("127.0.0.1") and not x.start_with?("127.0.0.1   localhost")
+                output[i] = "127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4"
+              end
+            end
+            output = (output.join("\n")+"\n")
+          end
+
+          return output
         end
 
         def read_or_create_id
