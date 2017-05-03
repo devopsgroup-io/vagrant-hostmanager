@@ -41,7 +41,7 @@ module VagrantPlugins
 
           if update_file(file, machine, false, line_endings)
             # upload modified file and remove temporary file
-            machine.communicate.upload(file.to_s, '/tmp/hosts')
+            machine.communicate.upload(file.to_s, "/tmp/hosts/hosts.#{machine.name}")
             if windir
               machine.communicate.sudo("mv -force /tmp/hosts/hosts.#{machine.name} #{realhostfile}")
             else
