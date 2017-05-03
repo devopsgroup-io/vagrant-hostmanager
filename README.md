@@ -6,7 +6,7 @@ Vagrant Host Manager
 [![Gem](https://img.shields.io/gem/dtv/vagrant-hostmanager.svg)](https://rubygems.org/gems/vagrant-hostmanager)
 [![Twitter](https://img.shields.io/twitter/url/https/github.com/devopsgroup-io/vagrant-hostmanager.svg?style=social)](https://twitter.com/intent/tweet?text=Check%20out%20this%20awesome%20Vagrant%20plugin%21&url=https%3A%2F%2Fgithub.com%devopsgroup-io%2Fvagrant-hostmanager&hashtags=vagrant%hostmanager&original_referer=)
 
-`vagrant-hostmanager` is a plugin that manages the `hosts` file on guest machines (and optionally the host). Its goal is to enable resolution of multi-machine environments deployed with a cloud provider where IP addresses are not known in advance.
+`vagrant-hostmanager` is a plugin that manages the `/etc/hosts` file on guest machines (and optionally the host). Its goal is to enable resolution of multi-machine environments deployed with a cloud provider where IP addresses are not known in advance.
 
 Installation
 ------------
@@ -16,7 +16,7 @@ Install the plugin following the typical Vagrant 1.1 procedure:
 
 Usage
 -----
-To update the `hosts` file on each active machine, run the following
+To update the `/etc/hosts` file on each active machine, run the following
 command:
 
     $ vagrant hostmanager
@@ -24,14 +24,14 @@ command:
 The plugin hooks into the `vagrant up` and `vagrant destroy` commands
 automatically.
 When a machine enters or exits the running state , all active
-machines with the same provider will have their `hosts` file updated
+machines with the same provider will have their `/etc/hosts` file updated
 accordingly. Set the `hostmanager.enabled` attribute to `true` in the
 Vagrantfile to activate this behavior.
 
-To update the host's `hosts` file, set the `hostmanager.manage_host`
+To update the host's `/etc/hosts` file, set the `hostmanager.manage_host`
 attribute to `true`.
 
-To update the guests' `hosts` file, set the `hostmanager.manage_guest`
+To update the guests' `/etc/hosts` file, set the `hostmanager.manage_guest`
 attribute to `true`.
 
 A machine's IP address is defined by either the static IP for a private
@@ -90,14 +90,14 @@ config.vm.provision :hostmanager
 Custom IP resolver
 ------------------
 
-You can customize how vagrant-hostmanager resolves IP address
-for each machine. This might be handy in the case of the AWS provider,
-where the host name is stored in the ssh_info hash of each machine.
-This causes a generation of an invalid `hosts` file.
+You can customize way, how host manager resolves IP address
+for each machine. This might be handy in case of aws provider,
+where host name is stored in ssh_info hash of each machine.
+This causes generation of invalid /etc/hosts file.
 
-A custom IP resolver gives you the oportunity to calculate IP address
-for each machine by yourself, giving you access to the machine that is
-updating `hosts`. For example:
+Custom IP resolver gives you oportunity to calculate IP address
+for each machine by yourself, giving You also access to the machine that is
+updating /etc/hosts. For example:
 
 ```ruby
 config.hostmanager.ip_resolver = proc do |vm, resolving_vm|
@@ -188,11 +188,12 @@ To contribute, fork then clone the repository, and then the following:
 
 **Developing**
 
-1. Install [Bundler](http://bundler.io/)
-2. Currently the Bundler version is locked to 1.6.9, please install this version.
-    * `sudo gem install bundler -v '1.6.9'`
+1. Ideally, install the version of Vagrant as defined in the `Gemfile`
+1. Install [Ruby](https://www.ruby-lang.org/en/documentation/installation/)
+2. Currently the Bundler version is locked to 1.14.6, please install this version.
+    * `gem install bundler -v '1.14.6'`
 3. Then install vagrant-hostmanager dependancies:
-    * `bundle _1.6.9_ install`
+    * `bundle _1.14.6_ install`
 
 **Testing**
 
