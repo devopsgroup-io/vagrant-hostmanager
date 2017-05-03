@@ -6,17 +6,16 @@ Vagrant Host Manager
 [![Gem](https://img.shields.io/gem/dtv/vagrant-hostmanager.svg)](https://rubygems.org/gems/vagrant-hostmanager)
 [![Twitter](https://img.shields.io/twitter/url/https/github.com/devopsgroup-io/vagrant-hostmanager.svg?style=social)](https://twitter.com/intent/tweet?text=Check%20out%20this%20awesome%20Vagrant%20plugin%21&url=https%3A%2F%2Fgithub.com%devopsgroup-io%2Fvagrant-hostmanager&hashtags=vagrant%hostmanager&original_referer=)
 
-`vagrant-hostmanager` is a plugin that manages the `/etc/hosts` file on guest machines (and optionally the host). Its goal is to enable resolution of multi-machine environments deployed with a cloud provider where IP addresses are not known in advance.
+`vagrant-hostmanager` is a Vagrant plugin that manages the `hosts` file on guest machines (and optionally the host). Its goal is to enable resolution of multi-machine environments deployed with a cloud provider where IP addresses are not known in advance.
 
 Installation
 ------------
-Install the plugin following the typical Vagrant 1.1 procedure:
 
     $ vagrant plugin install vagrant-hostmanager
 
 Usage
 -----
-To update the `/etc/hosts` file on each active machine, run the following
+To update the `hosts` file on each active machine, run the following
 command:
 
     $ vagrant hostmanager
@@ -24,14 +23,14 @@ command:
 The plugin hooks into the `vagrant up` and `vagrant destroy` commands
 automatically.
 When a machine enters or exits the running state , all active
-machines with the same provider will have their `/etc/hosts` file updated
+machines with the same provider will have their `hosts` file updated
 accordingly. Set the `hostmanager.enabled` attribute to `true` in the
 Vagrantfile to activate this behavior.
 
-To update the host's `/etc/hosts` file, set the `hostmanager.manage_host`
+To update the host's `hosts` file, set the `hostmanager.manage_host`
 attribute to `true`.
 
-To update the guests' `/etc/hosts` file, set the `hostmanager.manage_guest`
+To update the guests' `hosts` file, set the `hostmanager.manage_guest`
 attribute to `true`.
 
 A machine's IP address is defined by either the static IP for a private
@@ -159,12 +158,13 @@ visible errors, however the ```hosts``` file will not be updated.
 
 Compatibility
 -------------
-This Vagrant plugin has been tested with the following technology.
+This Vagrant plugin has been tested with the following host and guest operating system combinations.
 
 Date Tested | Vagrant Version | vagrant-hostmanager Version | Host (Workstation) Operating System | Guest (VirtualBox) Operating System
 ------------|-----------------|-----------------------------|-------------------------------------|--------------------------------------
 03/23/2016  | 1.8.1           | 1.8.1                       | Ubuntu 14.04 LTS                    | CentOS 7.2
 03/22/2016  | 1.8.1           | 1.8.1                       | OS X 10.11.4                        | CentOS 7.2
+05/03/2017  | 1.9.4           | 1.8.6                       | macOS 10.12.4                       | Windows Server 2012 R2
 
 
 Troubleshooting
