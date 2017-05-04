@@ -64,6 +64,48 @@ Vagrant.configure("2") do |config|
 end
 ```
 
+### Using with DHCP
+
+Sometimes the development box's ip isn't needed, and just assigning it a domain is all that is required.  If that's the case vagrant can rely on DHCP to assign the IP, and vagrant-hostmanager to setup the hosts file.  
+The below example creates a vagrant box with a dynamically allocated IP, then queries the box for the IP to add to the host computer's hosts file, associating the domain 'development-test.local' with the vagrant box's IP.
+
+```ruby
+Vagrant.configure(2) do |config|
+    config.vm.box = 'chef/centos-6.5'
+
+    config.hostmanager.enabled = true
+    config.hostmanager.manage_host = true
+
+    config.hostmanager.ip_resolver = proc do |vm, resolving_vm|
+        begin
+            buffer = '';
+            vm.communicate.execute("/sbin/ifconfig") do |type, data|
+              buffer += data if type == :stdout
+            end
+
+            ips = []
+            ifconfigIPs = buffer.scan(/inet addr:(\d+\.\d+\.\d+\.\d+)/)
+            ifconfigIPs[0..ifconfigIPs.size].each do |ip|
+                ip = ip.first
+
+                next unless system "ping -c1 -t1 #{ip} > /dev/null"
+
+                ips.push(ip) unless ips.include? ip
+            end
+
+            ips.first
+        rescue StandardError => exc
+            return
+        end
+    end
+
+    config.vm.network 'private_network', type: :dhcp
+    config.vm.hostname = "test-development.local"
+
+    config.vm.provision :hostmanager
+end
+```
+
 ### Provisioner
 
 Starting at version 1.5.0, `vagrant up` runs hostmanager before any provisioning occurs. 
