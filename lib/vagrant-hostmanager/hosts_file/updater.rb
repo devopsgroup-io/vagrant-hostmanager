@@ -101,7 +101,11 @@ module VagrantPlugins
           host = machine.config.vm.hostname || machine.name
           aliases = machine.config.hostmanager.aliases
           if ip != nil
-            "#{ip}\t#{host}\n" + aliases.map{|a| "#{ip}\t#{a}"}.join("\n") + "\n"
+            host_record = "#{ip}\t#{host}\n" + aliases.map{|a| "#{ip}\t#{a}"}.join("\n") + "\n"
+            if machine.state.short_description.eql? "poweroff"
+              host_record = "## #{host_record}"
+            end
+            return host_record
           end
         end
 
