@@ -8,6 +8,7 @@ module VagrantPlugins
       attr_accessor :aliases
       attr_accessor :include_offline
       attr_accessor :ip_resolver
+      attr_accessor :extra_hosts
 
       alias_method :enabled?, :enabled
       alias_method :include_offline?, :include_offline
@@ -22,6 +23,7 @@ module VagrantPlugins
         @include_offline    = UNSET_VALUE
         @aliases            = UNSET_VALUE
         @ip_resolver        = UNSET_VALUE
+        @extra_hosts        = UNSET_VALUE
       end
 
       def finalize!
@@ -32,6 +34,7 @@ module VagrantPlugins
         @include_offline    = false if @include_offline == UNSET_VALUE
         @aliases            = [] if @aliases == UNSET_VALUE
         @ip_resolver        = nil if @ip_resolver == UNSET_VALUE
+        @extra_hosts        = [] if @extra_hosts == UNSET_VALUE
 
         @aliases = [ @aliases ].flatten
       end
@@ -46,12 +49,19 @@ module VagrantPlugins
         errors << validate_bool('hostmanager.include_offline', @include_offline)
         errors.compact!
 
-        # check if aliases option is an Array
+        # check if aliases option is an Array or String
         if  !machine.config.hostmanager.aliases.kind_of?(Array) &&
             !machine.config.hostmanager.aliases.kind_of?(String)
           errors << I18n.t('vagrant_hostmanager.config.not_an_array_or_string', {
             :config_key => 'hostmanager.aliases',
             :is_class   => aliases.class.to_s,
+          })
+        end
+
+        if  !machine.config.hostmanager.extra_hosts.kind_of?(Array)
+          errors << I18n.t('vagrant_hostmanager.config.not_an_array', {
+            :config_key => 'hostmanager.extra_hosts',
+            :is_class   => extra_hosts.class.to_s,
           })
         end
 

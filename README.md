@@ -44,6 +44,9 @@ set, it falls back to the symbol defining the machine in the Vagrantfile.
 If the `hostmanager.include_offline` attribute is set to `true`, boxes that are
 up or have a private ip configured will be added to the hosts file.
 
+If the `hostmanager.extra_hosts` attribute is set, boxes defined will be added
+to the hosts file
+
 In addition, the `hostmanager.aliases` configuration attribute can be used
 to provide aliases for your host names.
 
@@ -56,6 +59,14 @@ Vagrant.configure("2") do |config|
   config.hostmanager.manage_guest = true
   config.hostmanager.ignore_private_ip = false
   config.hostmanager.include_offline = true
+  config.hostmanager.extra_hosts  = [
+      [
+          '192.168.42.41', [
+              'external-box.localdomain',
+              'subdomain.external-box.localdomain',
+          ]
+      ],
+  ]
   config.vm.define 'example-box' do |node|
     node.vm.hostname = 'example-box-hostname'
     node.vm.network :private_network, ip: '192.168.42.42'

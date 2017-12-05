@@ -93,6 +93,12 @@ module VagrantPlugins
           body = get_machines
             .map { |machine| get_hosts_file_entry(machine, resolving_machine) }
             .join
+          unless body.empty? #only when there is at least one active machine
+              extra_hosts = @config.hostmanager.extra_hosts
+              body << extra_hosts
+                .map { |ip, aliases| aliases.map{|a| "#{ip}\t#{a}"}.join("\n") + "\n\n" }
+                .join
+          end
           get_new_content(header, footer, body, file_content, line_endings)
         end
 
