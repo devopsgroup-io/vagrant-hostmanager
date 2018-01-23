@@ -95,11 +95,24 @@ module VagrantPlugins
             .join
           unless body.empty? #only when there is at least one active machine
               extra_hosts = @config.hostmanager.extra_hosts
-              body << extra_hosts
-                .map { |ip, aliases| aliases.map{|a| "#{ip}\t#{a}"}.join("\n") + "\n\n" }
-                .join
+              case depth(extra_hosts)
+              #allow single defs: config.hostmanager.extra_hosts = ['172.28.128.100', ['db.dev']]
+              when 1
+                  body << extra_hosts
+                      .map { |ip, aliases| "#{ip}\t#{aliases}"}.join(" ") + "\n\n"
+              #and multiple ones, config.hostmanager.extra_hosts = [['172.28.128.100', ['db.dev']], ['0.0.0.0', ['db.io', 'db.dev']] ]
+              when 2
+                  body << extra_hosts
+                      .map { |ip, aliases| aliases.map{|a| "#{ip}\t#{a}"}.join("\n") + "\n\n" }
+                      .join
+              end
           end
           get_new_content(header, footer, body, file_content, line_endings)
+        end
+
+        def depth(array)
+            return 0 unless array.is_a?(Array)
+            return 1 + depth(array[0])
         end
 
         def get_hosts_file_entry(machine, resolving_machine)
