@@ -5,7 +5,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'vagrant-hostmanager/version'
 
 Gem::Specification.new do |gem|
-  gem.name          = 'vagrant-hostmanager'
+  gem.name          = 'vagrant-hostmanager-ext'
   gem.version       = VagrantPlugins::HostManager::VERSION
   gem.authors       = ['Shawn Dahlen','Seth Reeser']
   gem.email         = ['shawn@dahlen.me','info@devopsgroup.io']
