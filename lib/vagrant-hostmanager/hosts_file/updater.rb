@@ -65,7 +65,7 @@ module VagrantPlugins
             line_endings = "crlf"
           else
             hosts_location = '/etc/hosts'
-            copy_proc = Proc.new { `[ -w #{hosts_location} ] && cat #{file} > #{hosts_location} || sudo cp #{file} #{hosts_location}` }
+            copy_proc = Proc.new { `[ -w "#{hosts_location}" ] && cat "#{file}" > "#{hosts_location}" || sudo cp "#{file}" "#{hosts_location}"` }
             line_endings = "lf"
           end
 
