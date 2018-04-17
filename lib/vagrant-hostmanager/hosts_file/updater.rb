@@ -45,7 +45,7 @@ module VagrantPlugins
             if windir
               machine.communicate.sudo("mv -force /tmp/hosts.#{machine.name} #{realhostfile}")
             else
-              machine.communicate.sudo("cat /tmp/hosts.#{machine.name} > #{realhostfile} && rm /tmp/hosts.#{machine.name}")
+              machine.communicate.sudo("cat /tmp/hosts.#{machine.name} > #{realhostfile} && rm -f /tmp/hosts.#{machine.name}")
             end
           end
 
