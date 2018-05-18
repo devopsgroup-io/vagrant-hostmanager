@@ -8,6 +8,9 @@ Vagrant Host Manager
 
 `vagrant-hostmanager` is a Vagrant plugin that manages the `hosts` file on guest machines (and optionally the host). Its goal is to enable resolution of multi-machine environments deployed with a cloud provider where IP addresses are not known in advance.
 
+Do you like what we do? Consider supporting us through Patreon. All of the money goes directly back into growing our collection of open source and free software.
+[![Patreon](https://img.shields.io/badge/patreon-donate-red.svg)](https://www.patreon.com/devopsgroup)
+
 Installation
 ------------
 
