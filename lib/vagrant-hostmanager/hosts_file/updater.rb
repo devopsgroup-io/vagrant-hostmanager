@@ -88,8 +88,8 @@ module VagrantPlugins
 
         def update_content(file_content, resolving_machine, include_id, line_endings)
           id = include_id ? " id: #{read_or_create_id}" : ""
-          header = "## vagrant-hostmanager-start#{id}\n"
-          footer = "## vagrant-hostmanager-end\n"
+          header = "## vagrant-hostmanager-start#{id}"
+          footer = "## vagrant-hostmanager-end"
           body = get_machines
             .map { |machine| get_hosts_file_entry(machine, resolving_machine) }
             .join
@@ -146,12 +146,12 @@ module VagrantPlugins
           if body.empty?
             block = "\n"
           else
-            block = "\n\n" + header + body + footer + "\n"
+            block = "\n\n" + header + "\n" + body + footer + "\n\n"
           end
           # Pattern for finding existing block
           header_pattern = Regexp.quote(header)
           footer_pattern = Regexp.quote(footer)
-          pattern = Regexp.new("\n*#{header_pattern}.*?#{footer_pattern}\n*", Regexp::MULTILINE)
+          pattern = Regexp.new("[\r\n]*#{header_pattern}.*?#{footer_pattern}[\r\n]*", Regexp::MULTILINE)
           # Replace existing block or append
           content = old_content.match(pattern) ? old_content.sub(pattern, block) : old_content.rstrip + block
           if line_endings == "crlf"
