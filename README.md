@@ -39,7 +39,7 @@ attribute to `true`.
 A machine's IP address is defined by either the static IP for a private
 network configuration or by the SSH host configuration. To disable
 using the private network IP address, set `config.hostmanager.ignore_private_ip`
-to true.
+to `true`.
 
 A machine's host name is defined by `config.vm.hostname`. If this is not
 set, it falls back to the symbol defining the machine in the Vagrantfile.
@@ -50,6 +50,10 @@ up or have a private ip configured will be added to the hosts file.
 In addition, the `hostmanager.aliases` configuration attribute can be used
 to provide aliases for your host names.
 
+If additional host file entries are required (for example if you are also
+running local docker instanes), set the `hostmanager.additional_hosts` attribute
+with a host entry => ip address hash.
+
 Example configuration:
 
 ```ruby
@@ -59,6 +63,7 @@ Vagrant.configure("2") do |config|
   config.hostmanager.manage_guest = true
   config.hostmanager.ignore_private_ip = false
   config.hostmanager.include_offline = true
+  config.hostmanager.additional_hosts = { 'database.local' => '127.0.0.1' }
   config.vm.define 'example-box' do |node|
     node.vm.hostname = 'example-box-hostname'
     node.vm.network :private_network, ip: '192.168.42.42'
