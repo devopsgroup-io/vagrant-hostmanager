@@ -20,6 +20,12 @@ module VagrantPlugins
           # skip if machine is not active on destroy action
           return @app.call(env) if !@machine.id && env[:machine_action] == :destroy
 
+
+          # check if update_on_halt is true on halt action
+          if env[:machine_action] == :halt
+            return @app.call(env) unless @config.hostmanager.update_on_halt?
+          end
+
           # check config to see if the hosts file should be update automatically
           return @app.call(env) unless @config.hostmanager.enabled?
           @logger.info 'Updating /etc/hosts file automatically'
