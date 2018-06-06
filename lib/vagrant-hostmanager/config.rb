@@ -24,6 +24,30 @@ module VagrantPlugins
         @ip_resolver        = UNSET_VALUE
       end
 
+      def merge(other)
+        super.tap do |result|
+          @enabled                  = false if @enabled == UNSET_VALUE
+          other.enabled             = false if other.enabled == UNSET_VALUE
+          result.enabled            = [@enabled, other.enabled].any?
+
+          @manage_host              = false if @manage_host == UNSET_VALUE
+          other.manage_host         = false if other.manage_host == UNSET_VALUE
+          result.manage_host        = [@manage_host, other.manage_host].any?
+
+          @manage_guest             = true if @manage_guest == UNSET_VALUE
+          other.manage_guest        = true if other.manage_guest == UNSET_VALUE
+          result.manage_guest       = [@manage_guest, other.manage_guest].any?
+
+          @ignore_private_ip        = false if @ignore_private_ip == UNSET_VALUE
+          other.ignore_private_ip   = false if other.ignore_private_ip == UNSET_VALUE
+          result.ignore_private_ip  = [@ignore_private_ip, other.ignore_private_ip].any?
+
+          @include_offline          = false if @include_offline == UNSET_VALUE
+          other.include_offline     = false if other.include_offline == UNSET_VALUE
+          result.include_offline    = [@include_offline, other.include_offline].any?
+        end
+      end
+
       def finalize!
         @enabled            = false if @enabled == UNSET_VALUE
         @manage_host        = false if @manage_host == UNSET_VALUE
