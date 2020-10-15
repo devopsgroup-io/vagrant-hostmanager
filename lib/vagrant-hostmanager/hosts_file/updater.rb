@@ -55,13 +55,34 @@ module VagrantPlugins
           # copy and modify hosts file on host with Vagrant-managed entries
           file = @global_env.tmp_path.join('hosts.local')
 
-          if WindowsSupport.windows?
+          if WindowsSupport.windows? || WindowsSupport.wsl?
             # lazily include windows Module
             class << self
               include WindowsSupport unless include? WindowsSupport
             end
-            hosts_location = "#{ENV['WINDIR']}\\System32\\drivers\\etc\\hosts"
-            copy_proc = Proc.new { windows_copy_file(file, hosts_location) }
+            windir = ENV['WINDIR']
+            if WindowsSupport.wsl?
+               Dir.chdir('/mnt/c'){
+                  windir = `cmd.exe /c echo %WINDIR%`.strip
+               }
+               # convert wsl path to windows path
+               if file.to_s =~ /\/mnt\/[a-z]\//
+                  win_file = file.to_s.sub(/^\/mnt\/([a-z])\//, '\1:\\').gsub('/', '\\')
+               else
+                  win_file = "\\\\wsl\$\\#{ENV['WSL_DISTRO_NAME']}" + file.to_s.gsub('/', '\\')
+               end
+               win_hosts_location = "#{windir}\\System32\\drivers\\etc\\hosts"
+               hosts_location = "/mnt/" + windir[0].downcase + "/" + windir[3..-1] + "/System32/drivers/etc/hosts"
+
+               # add to both, windows host and wsl machine
+               copy_proc = Proc.new {
+                  wsl_copy_file(file, hosts_location, win_file, win_hosts_location)
+                  `[ -w "/etc/hosts" ] && cat "#{file}" > "/etc/hosts" || sudo cp "#{file}" "/etc/hosts"`
+               }
+            else
+               hosts_location = "#{windir}\\System32\\drivers\\etc\\hosts"
+               copy_proc = Proc.new { windows_copy_file(file, hosts_location) }
+            end
             line_endings = "crlf"
           else
             hosts_location = '/etc/hosts'
@@ -70,6 +91,9 @@ module VagrantPlugins
           end
 
           FileUtils.cp(hosts_location, file)
+          if WindowsSupport.wsl?
+             FileUtils.chmod("+w", file)
+          end
 
           if update_file(file, nil, true, line_endings)
             copy_proc.call
@@ -183,6 +207,10 @@ module VagrantPlugins
             RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/
           end
 
+          def self.wsl?
+            defined?(ENV['WSLENV'])
+          end
+
           require 'win32ole' if windows?
 
           def windows_copy_file(source, dest)
@@ -192,6 +220,16 @@ module VagrantPlugins
             rescue Errno::EACCES
               # Access denied, try with elevated privileges
               windows_copy_file_elevated(source, dest)
+            end
+          end
+
+          def wsl_copy_file(source, dest, win_source, win_dest)
+            begin
+              # First, try Ruby copy
+              FileUtils.cp(source, dest)
+            rescue Errno::EACCES
+              # Access denied, try with elevated privileges
+              system('powershell.exe', 'Start-Process -Verb Runas -FilePath cmd.exe -Argumentlist "/C","copy","' + win_source + '","' + win_dest + '"')
             end
           end
 
