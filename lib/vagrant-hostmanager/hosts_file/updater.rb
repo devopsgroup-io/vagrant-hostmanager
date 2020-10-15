@@ -208,7 +208,7 @@ module VagrantPlugins
           end
 
           def self.wsl?
-            defined?(ENV['WSLENV'])
+            ENV.include?('WSLENV')
           end
 
           require 'win32ole' if windows?
