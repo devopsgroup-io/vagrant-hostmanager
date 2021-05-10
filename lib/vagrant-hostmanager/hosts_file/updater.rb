@@ -19,17 +19,17 @@ module VagrantPlugins
 
           if (machine.communicate.test("uname -s | grep SunOS"))
             realhostfile = "/etc/inet/hosts"
-            line_endings = "lf"
+            is_windows = false
           elsif (machine.communicate.test("test -d $Env:SystemRoot"))
             windir = ""
             machine.communicate.execute("echo %SYSTEMROOT%", {:shell => :cmd}) do |type, contents|
               windir << contents.gsub("\r\n", '') if type == :stdout
             end
             realhostfile = "#{windir}\\System32\\drivers\\etc\\hosts"
-            line_endings = "crlf"
+            is_windows = true
           else
             realhostfile = "/etc/hosts"
-            line_endings = "lf"
+            is_windows = false
           end
 
           # download and modify file with Vagrant-managed entries
@@ -39,7 +39,7 @@ module VagrantPlugins
           @logger.debug("file is: #{file.to_s}")
           @logger.debug("class of file is: #{file.class}")
 
-          if update_file(file, machine, false, line_endings)
+          if update_file(file, machine, false, is_windows)
             # upload modified file and remove temporary file
             machine.communicate.upload(file.to_s, "/tmp/hosts.#{machine.name}")
             if windir
@@ -62,38 +62,48 @@ module VagrantPlugins
             end
             hosts_location = "#{ENV['WINDIR']}\\System32\\drivers\\etc\\hosts"
             copy_proc = Proc.new { windows_copy_file(file, hosts_location) }
-            line_endings = "crlf"
+            is_windows=true
           else
             hosts_location = '/etc/hosts'
             copy_proc = Proc.new { `[ -w "#{hosts_location}" ] && cat "#{file}" > "#{hosts_location}" || sudo cp "#{file}" "#{hosts_location}"` }
-            line_endings = "lf"
+            is_windows=false
           end
 
           FileUtils.cp(hosts_location, file)
 
-          if update_file(file, nil, true, line_endings)
+          if update_file(file, nil, true, is_windows)
             copy_proc.call
           end
         end
 
         private
 
-        def update_file(file, resolving_machine = nil, include_id = true, line_endings)
+        def update_file(file, resolving_machine = nil, include_id = true, is_windows)
           file = Pathname.new(file)
           old_file_content = file.read
-          new_file_content = update_content(old_file_content, resolving_machine, include_id, line_endings)
-          file.open('wb') { |io| io.write(new_file_content) }
-          old_file_content != new_file_content
+          # Don't care what's been read by Pathname, just convert to universal line endings for comparison
+          old_file_content = old_file_content.encode(old_file_content.encoding, universal_newline: true)
+          new_file_content = update_content(old_file_content, resolving_machine, include_id)
+          is_hosts_file_changed = (old_file_content != new_file_content)
+
+          if is_hosts_file_changed
+            if is_windows
+              new_file_content = new_file_content.encode(new_file_content.encoding, :crlf_newline => true)
+            end
+
+            file.open('wb') { |io| io.write(new_file_content) }
+          end
+          is_hosts_file_changed
         end
 
-        def update_content(file_content, resolving_machine, include_id, line_endings)
+        def update_content(file_content, resolving_machine, include_id)
           id = include_id ? " id: #{read_or_create_id}" : ""
           header = "## vagrant-hostmanager-start#{id}"
           footer = "## vagrant-hostmanager-end"
           body = get_machines
             .map { |machine| get_hosts_file_entry(machine, resolving_machine) }
             .join
-          get_new_content(header, footer, body, file_content, line_endings)
+          get_new_content(header, footer, body, file_content)
         end
 
         def get_hosts_file_entry(machine, resolving_machine)
@@ -142,7 +152,7 @@ module VagrantPlugins
             .reject(&:nil?)
         end
 
-        def get_new_content(header, footer, body, old_content, line_endings)
+        def get_new_content(header, footer, body, old_content)
           if body.empty?
             block = "\n"
           else
@@ -151,16 +161,9 @@ module VagrantPlugins
           # Pattern for finding existing block
           header_pattern = Regexp.quote(header)
           footer_pattern = Regexp.quote(footer)
-          pattern = Regexp.new("[\r\n]*#{header_pattern}.*?#{footer_pattern}[\r\n]*", Regexp::MULTILINE)
+          pattern = Regexp.new("[\n]*#{header_pattern}.*?#{footer_pattern}[\n]*", Regexp::MULTILINE)
           # Replace existing block or append
           content = old_content.match(pattern) ? old_content.sub(pattern, block) : old_content.rstrip + block
-          if line_endings == "crlf"
-            content.encode(content.encoding, :universal_encoding => true).encode(content.encoding, :crlf_newline => true)
-          elsif line_endings == "lf"
-            content.encode(content.encoding, :universal_encoding => true)
-          else
-            content.encode(content.encoding, :universal_encoding => true)
-          end
         end
 
         def read_or_create_id
