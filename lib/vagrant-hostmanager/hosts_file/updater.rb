@@ -84,12 +84,16 @@ module VagrantPlugins
           # Don't care what's been read by Pathname, just convert to universal line endings for comparison
           old_file_content = old_file_content.encode(old_file_content.encoding, universal_newline: true)
           new_file_content = update_content(old_file_content, resolving_machine, include_id)
-          if is_windows
-            new_file_content = new_file_content.encode(new_file_content.encoding, :crlf_newline => true)
-          end
+          is_hosts_file_changed = (old_file_content != new_file_content)
 
-          file.open('wb') { |io| io.write(new_file_content) }
-          old_file_content != new_file_content
+          if is_hosts_file_changed
+            if is_windows
+              new_file_content = new_file_content.encode(new_file_content.encoding, :crlf_newline => true)
+            end
+
+            file.open('wb') { |io| io.write(new_file_content) }
+          end
+          is_hosts_file_changed
         end
 
         def update_content(file_content, resolving_machine, include_id)
