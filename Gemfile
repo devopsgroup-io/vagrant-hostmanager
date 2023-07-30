@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 group :development do
-  gem 'vagrant', :git => 'git://github.com/mitchellh/vagrant.git', :tag => 'v1.9.4'
+  gem 'vagrant', :git => 'https://github.com/hashicorp/vagrant.git', :tag => 'v2.3.7'
 end
 
 group :plugins do

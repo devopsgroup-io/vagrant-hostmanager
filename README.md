@@ -191,12 +191,10 @@ To contribute, fork then clone the repository, and then the following:
 
 **Developing**
 
-1. Ideally, install the version of Vagrant as defined in the `Gemfile`
-1. Install [Ruby](https://www.ruby-lang.org/en/documentation/installation/)
-2. Currently the Bundler version is locked to 1.14.6, please install this version.
-    * `gem install bundler -v '1.14.6'`
-3. Then install vagrant-hostmanager dependancies:
-    * `bundle _1.14.6_ install`
+1. Install [RVM](https://rvm.io/rvm/install)
+2. If using MacOS, follow these [OpenSSL instructions](https://github.com/rvm/rvm/issues/5252#issuecomment-1298835941)
+3. Use Ruby v3.0.0 `rvm use 3.0.0`
+4. Run `bundle install`
 
 **Testing**
 
