@@ -92,7 +92,7 @@ module VagrantPlugins
           footer = "## vagrant-hostmanager-end"
           body = get_machines
             .map { |machine| get_hosts_file_entry(machine, resolving_machine) }
-            .join
+            .flatten.uniq.join("\n") + "\n"
           get_new_content(header, footer, body, file_content, line_endings)
         end
 
@@ -100,10 +100,19 @@ module VagrantPlugins
           ip = get_ip_address(machine, resolving_machine)
           host = machine.config.vm.hostname || machine.name
           aliases = machine.config.hostmanager.aliases
+          additional_hosts = machine.config.hostmanager.additional_hosts
+
+          host_file_entry_list = []
           if ip != nil
-            "#{ip}\t#{host}\n" + aliases.map{|a| "#{ip}\t#{a}"}.join("\n") + "\n"
+            host_file_entry_list = ["#{ip}\t#{host}", aliases.map{|a| "#{ip}\t#{a}"}]
           end
-        end
+
+          additional_hosts.each do |host_name, ip_addr|
+            host_file_entry_list.push("#{ip_addr}\t#{host_name}")
+          end
+
+          host_file_entry_list
+      end
 
         def get_ip_address(machine, resolving_machine)
           custom_ip_resolver = machine.config.hostmanager.ip_resolver
