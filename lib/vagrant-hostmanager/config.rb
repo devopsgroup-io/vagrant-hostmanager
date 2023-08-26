@@ -8,11 +8,13 @@ module VagrantPlugins
       attr_accessor :aliases
       attr_accessor :include_offline
       attr_accessor :ip_resolver
+      attr_accessor :update_on_halt
 
       alias_method :enabled?, :enabled
       alias_method :include_offline?, :include_offline
       alias_method :manage_host?, :manage_host
       alias_method :manage_guest?, :manage_guest
+      alias_method :update_on_halt?, :update_on_halt
 
       def initialize
         @enabled            = UNSET_VALUE
@@ -22,6 +24,7 @@ module VagrantPlugins
         @include_offline    = UNSET_VALUE
         @aliases            = UNSET_VALUE
         @ip_resolver        = UNSET_VALUE
+        @update_on_halt     = UNSET_VALUE
       end
 
       def finalize!
@@ -32,6 +35,7 @@ module VagrantPlugins
         @include_offline    = false if @include_offline == UNSET_VALUE
         @aliases            = [] if @aliases == UNSET_VALUE
         @ip_resolver        = nil if @ip_resolver == UNSET_VALUE
+        @update_on_halt     = false if @update_on_halt ==  UNSET_VALUE
 
         @aliases = [ @aliases ].flatten
       end
@@ -44,6 +48,7 @@ module VagrantPlugins
         errors << validate_bool('hostmanager.manage_guest', @manage_guest)
         errors << validate_bool('hostmanager.ignore_private_ip', @ignore_private_ip)
         errors << validate_bool('hostmanager.include_offline', @include_offline)
+        errors << validate_bool('hostmanager.update_on_halt', @update_on_halt)
         errors.compact!
 
         # check if aliases option is an Array
