@@ -25,8 +25,8 @@ command:
 
 The plugin hooks into the `vagrant up` and `vagrant destroy` commands
 automatically.
-When a machine enters or exits the running state , all active
-machines with the same provider will have their `hosts` file updated
+When a machine enters or exits the running state, all active
+machines with the same provider will have their `/etc/hosts` file updated
 accordingly. Set the `hostmanager.enabled` attribute to `true` in the
 Vagrantfile to activate this behavior.
 
@@ -69,7 +69,7 @@ end
 
 ### Provisioner
 
-Starting at version 1.5.0, `vagrant up` runs hostmanager before any provisioning occurs. 
+Starting with version 1.5.0, `vagrant up` runs hostmanager before any provisioning occurs. 
 If you would like hostmanager to run after or during your provisioning stage, 
 you can use hostmanager as a provisioner.  This allows you to use the provisioning 
 order to ensure that hostmanager runs when desired. The provisioner will collect
@@ -92,14 +92,14 @@ config.vm.provision :hostmanager
 Custom IP resolver
 ------------------
 
-You can customize way, how host manager resolves IP address
-for each machine. This might be handy in case of aws provider,
-where host name is stored in ssh_info hash of each machine.
-This causes generation of invalid /etc/hosts file.
+You can customize how host manager resolves IP address
+for each machine. This might be handy in case of the aws provider,
+where host name is stored in the ssh_info hash of each machine.
+This causes generation of invalid `/etc/hosts` file.
 
-Custom IP resolver gives you oportunity to calculate IP address
-for each machine by yourself, giving You also access to the machine that is
-updating /etc/hosts. For example:
+Custom IP resolver gives you the oportunity to calculate the IP address
+for each machine by yourself, giving you also access to the machine that is
+updating `/etc/hosts`. For example:
 
 ```ruby
 config.hostmanager.ip_resolver = proc do |vm, resolving_vm|
