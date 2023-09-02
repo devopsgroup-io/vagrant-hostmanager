@@ -7,7 +7,7 @@ module VagrantPlugins
       def initialize(machine, config)
         super(machine, config)
         global_env = machine.env
-        @config = Util.get_config(global_env)
+        @config = config
         @updater = HostsFile::Updater.new(global_env, machine.provider_name)
       end
 
