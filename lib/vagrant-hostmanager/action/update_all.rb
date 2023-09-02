@@ -27,7 +27,7 @@ module VagrantPlugins
           @app.call(env)
 
           # update /etc/hosts file on active machines
-          if @machine.config.hostmanager.manage_guest?
+          if @config.hostmanager.manage_guest?
             env[:ui].info I18n.t('vagrant_hostmanager.action.update_guests')
             @global_env.active_machines.each do |name, p|
               if p == @provider
@@ -41,7 +41,7 @@ module VagrantPlugins
           end
 
           # update /etc/hosts files on host if enabled
-          if @machine.config.hostmanager.manage_host?
+          if @config.hostmanager.manage_host?
             env[:ui].info I18n.t('vagrant_hostmanager.action.update_host')
             @updater.update_host
           end
